@@ -10,7 +10,7 @@ export function getStripe(): Stripe {
   return stripe;
 }
 
-// Each plan is a Price created in the Nicely Stripe dashboard. Real Price IDs
+// Each plan is a Price created in the Nicelyy Stripe dashboard. Real Price IDs
 // (not prices made up at checkout) are what let customers switch plans in
 // Stripe's billing portal.
 export function priceIdFor(tier: PaidTier): string {

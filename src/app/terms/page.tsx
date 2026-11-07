@@ -9,15 +9,15 @@ export default function Terms() {
   return (
     <Legal title="Terms of use" updated="7 November 2026">
       <p>
-        These terms cover your use of Nicely, run by {LEGAL_NAME} (&ldquo;we&rdquo;). By creating an
+        These terms cover your use of Nicelyy, run by {LEGAL_NAME} (&ldquo;we&rdquo;). By creating an
         account you agree to them.
       </p>
 
-      <h2>What Nicely does</h2>
+      <h2>What Nicelyy does</h2>
       <p>
-        Nicely uses artificial intelligence to suggest a rewritten version of a message you give it.
+        Nicelyy uses artificial intelligence to suggest a rewritten version of a message you give it.
         Suggestions can be wrong or not suit your situation. You decide whether to send them, and you
-        are responsible for what you send. Nicely is not legal, employment, medical or financial advice.
+        are responsible for what you send. Nicelyy is not legal, employment, medical or financial advice.
       </p>
 
       <h2>Plans and payment</h2>
@@ -47,13 +47,13 @@ export default function Terms() {
         you reach it, your messages top up when your plan renews.
       </p>
 
-      <h2>Using Nicely properly</h2>
-      <p>Don't use Nicely to harass, threaten, deceive or harm anyone, or to break the law. Don't try to
+      <h2>Using Nicelyy properly</h2>
+      <p>Don't use Nicelyy to harass, threaten, deceive or harm anyone, or to break the law. Don't try to
         get around usage limits, or share your account. We may suspend accounts that do.</p>
 
       <h2>Our responsibility</h2>
       <p>
-        We work hard to keep Nicely available and useful, but can't promise it will always be. Nothing in
+        We work hard to keep Nicelyy available and useful, but can't promise it will always be. Nothing in
         these terms limits rights you have by law as a consumer. We're not responsible for how a message
         you choose to send is received.
       </p>

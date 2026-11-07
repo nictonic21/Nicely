@@ -8,15 +8,15 @@ const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(base),
   title: {
-    default: "Nicely: say difficult things the easy way",
-    template: "%s · Nicely",
+    default: "Nicelyy: say difficult things the easy way",
+    template: "%s · Nicelyy",
   },
   description:
-    "Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicely turns it into a clear, calm message that's ready to send.",
+    "Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicelyy turns it into a clear, calm message that's ready to send.",
   openGraph: {
-    title: "Nicely: say difficult things the easy way",
+    title: "Nicelyy: say difficult things the easy way",
     description:
-      "Type it, paste it or say it out loud. Nicely turns it into a clear, calm message that's ready to send.",
+      "Type it, paste it or say it out loud. Nicelyy turns it into a clear, calm message that's ready to send.",
     type: "website",
     locale: "en_GB",
   },

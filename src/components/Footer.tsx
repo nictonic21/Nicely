@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 py-10 text-sm sm:flex-row sm:px-6">
         <div className="flex flex-col items-center gap-1 sm:items-start">
           <Logo light />
-          <p>© {new Date().getFullYear()} Nicely. Say it nicely.</p>
+          <p>© {new Date().getFullYear()} Nicelyy. Say it nicely.</p>
         </div>
         <div className="flex gap-6">
           <Link href="/#pricing" className="transition hover:text-white">Pricing</Link>

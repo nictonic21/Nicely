@@ -143,7 +143,7 @@ export default function AccountClient() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/app" className="btn-primary">Open Nicely</Link>
+            <Link href="/app" className="btn-primary">Open Nicelyy</Link>
             {me.hasBilling ? (
               <button type="button" onClick={openPortal} disabled={!!busy} className="btn-secondary">
                 {busy === "portal" ? "Opening…" : "Manage billing"}

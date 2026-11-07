@@ -7,7 +7,7 @@ export default async function Nav() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/60 bg-cream/70 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" aria-label="Nicely home">
+        <Link href="/" aria-label="Nicelyy home">
           <Logo />
         </Link>
         <div className="flex items-center gap-1 text-sm font-semibold sm:gap-3">
@@ -20,7 +20,7 @@ export default async function Nav() {
                 Account
               </Link>
               <Link href="/app" className="btn-primary px-4 py-2">
-                Open Nicely
+                Open Nicelyy
               </Link>
             </>
           ) : (

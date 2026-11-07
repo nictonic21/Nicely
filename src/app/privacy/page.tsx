@@ -8,7 +8,7 @@ export default function Privacy() {
   return (
     <Legal title="Privacy policy" updated="7 November 2026">
       <p>
-        {LEGAL_NAME} runs Nicely and is responsible for your personal data under UK data protection
+        {LEGAL_NAME} runs Nicelyy and is responsible for your personal data under UK data protection
         law. In short: <strong>we don't keep what you write.</strong>
       </p>
 
@@ -21,7 +21,7 @@ export default function Privacy() {
       </p>
       <p>
         Voice notes use your browser's built-in speech-to-text, run by your browser maker (such as Apple
-        or Google). The words simply appear in the text box. Nicely never receives a recording.
+        or Google). The words simply appear in the text box. Nicelyy never receives a recording.
       </p>
 
       <h2>What we do keep</h2>

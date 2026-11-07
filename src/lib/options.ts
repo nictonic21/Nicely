@@ -3,7 +3,7 @@
 export const TONES = [
   { id: "professional", label: "Professional", hint: "Polite, firm, work-ready" },
   { id: "kind", label: "Kind", hint: "Warm and gentle" },
-  { id: "firm", label: "Firm", hint: "Clear boundaries, no drama" },
+  { id: "firm", label: "Firm", hint: "Clear and no drama" },
   { id: "comeback", label: "Strong comeback", hint: "Confident and sharp" },
   { id: "simple", label: "Clear & simple", hint: "Short and plain" },
 ] as const;
@@ -17,8 +17,8 @@ export const RECIPIENTS = [
 ] as const;
 
 export const FORMATS = [
-  { id: "text", label: "Text / WhatsApp" },
-  { id: "email", label: "Email" },
+  { id: "text", label: "Text / WhatsApp", short: "Text" },
+  { id: "email", label: "Email", short: "Email" },
 ] as const;
 
 export type ToneId = (typeof TONES)[number]["id"];

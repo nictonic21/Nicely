@@ -1,6 +1,6 @@
-# Nicely
+# Nicelyy
 
-**Say difficult things the easy way.** Type, paste or voice-note what you want to say, and Nicely rewrites it into a clear, calm message that's ready to send, in the tone you pick (Professional, Kind, Firm, Strong comeback, Clear & simple).
+**Say difficult things the easy way.** Type, paste or voice-note what you want to say, and Nicelyy rewrites it into a clear, calm message that's ready to send, in the tone you pick (Professional, Kind, Firm, Strong comeback, Clear & simple).
 
 | Plan | Price | Messages |
 |---|---|---|
@@ -19,14 +19,14 @@ Plan rules live in one file: `src/lib/plans.ts`.
 
 ## Go-live guide (step by step)
 
-Nicely is **completely separate from Hatch**. Every account below must be a **new** one for Nicely. Never reuse Hatch's.
+Nicelyy is **completely separate from Hatch**. Every account below must be a **new** one for Nicelyy. Never reuse Hatch's.
 
 Do the steps in order. Keep a note open: you'll copy several keys into it, and paste them into Vercel in Step 5.
 
 ### Step 1: Supabase (accounts and database)
 
 1. Go to **supabase.com** and log in.
-2. Click **New project**. Name it `nicely`. Pick region **London (eu-west-2)**. Choose a strong database password and save it somewhere safe.
+2. Click **New project**. Name it `nicelyy`. Pick region **London (eu-west-2)**. Choose a strong database password and save it somewhere safe.
 3. Wait for the project to finish setting up (about 2 minutes).
 4. In the left menu, click **SQL Editor**, then **New query**.
 5. Open the file `supabase/schema.sql` from this repository. Copy **all** of it, paste it in, and click **Run**. You should see "Success".
@@ -39,23 +39,23 @@ Do the steps in order. Keep a note open: you'll copy several keys into it, and p
 
 1. Go to **console.anthropic.com** and sign up or log in.
 2. Add a payment method under **Billing**, and add some credit (£20 is plenty to start).
-3. Go to **API Keys → Create key**. Name it `nicely`.
+3. Go to **API Keys → Create key**. Name it `nicelyy`.
 4. Copy the key into your note as `ANTHROPIC_API_KEY`.
 5. Optional but wise: under **Limits**, set a monthly spend limit.
 
 ### Step 3: Stripe (payments)
 
-1. Go to **stripe.com** and create a **new account** for Nicely. If you already have Stripe for Hatch, use the account menu at the top left → **New account**.
+1. Go to **stripe.com** and create a **new account** for Nicelyy. If you already have Stripe for Hatch, use the account menu at the top left → **New account**.
 2. Stay in **Test mode** (toggle at the top) until you've tested everything.
 3. Go to **Product catalogue → Add product** and create three products, each with a **Recurring, Monthly** price in **GBP**:
-   - `Nicely Starter`: £7.00
-   - `Nicely Plus`: £15.00
-   - `Nicely Unlimited`: £20.00
+   - `Nicelyy Starter`: £7.00
+   - `Nicelyy Plus`: £15.00
+   - `Nicelyy Unlimited`: £20.00
 4. Open each product, click its price, and copy the **Price ID** (it starts with `price_`) into your note:
    - `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PLUS`, `STRIPE_PRICE_UNLIMITED`
 5. Go to **Developers → API keys**. Copy the **Secret key** → `STRIPE_SECRET_KEY`.
 6. Go to **Settings → Billing → Customer portal**:
-   - Turn on **Customers can update subscriptions**, and add all three Nicely products, so people can switch plans.
+   - Turn on **Customers can update subscriptions**, and add all three Nicelyy products, so people can switch plans.
    - Turn on **Cancel subscriptions**.
    - Click **Save**.
 7. You'll set up the webhook in Step 6, once the site has an address.
@@ -63,7 +63,7 @@ Do the steps in order. Keep a note open: you'll copy several keys into it, and p
 ### Step 4: Vercel (hosting)
 
 1. Go to **vercel.com** and click **Add New → Project**.
-2. Import the **nicely** GitHub repository.
+2. Import the **nicely** GitHub repository (the code repository keeps its original name, which is fine).
 3. Leave the settings as they are (Framework: Next.js). **Don't** deploy yet. Go to Step 5 first.
 
 ### Step 5: Add the keys to Vercel
@@ -116,7 +116,6 @@ Do the steps in order. Keep a note open: you'll copy several keys into it, and p
 ## Before you launch: checklist
 
 - [ ] Ask a solicitor to review `/terms` and `/privacy`. They're solid drafts, not legal advice.
-- [ ] Add your logo and favicon (send your artwork; it isn't made up here).
 - [ ] Register with the ICO (data protection fee, about £40–£60 a year): ico.org.uk
 - [ ] Set a monthly spend limit in the Anthropic console.
 

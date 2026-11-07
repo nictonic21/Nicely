@@ -62,7 +62,7 @@ export default function LoginPage() {
       <p className="mt-8 text-center text-sm text-ink/70">
         New here?{" "}
         <Link href={`/signup?next=${encodeURIComponent(next)}`} className="font-semibold text-accent">
-          Try Nicely free
+          Try Nicelyy free
         </Link>
       </p>
     </AuthShell>

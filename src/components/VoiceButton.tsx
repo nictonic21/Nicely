@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { IconMic, IconStop } from "@/components/Icons";
 
 // Voice notes, using the browser's built-in speech-to-text (Chrome, Edge,
-// Safari on iPhone, Mac and iPad). Nothing is recorded or stored by Nicely:
+// Safari on iPhone, Mac and iPad). Nothing is recorded or stored by Nicelyy:
 // the words simply appear in the box as you speak.
 
 // Minimal typing for the Web Speech API, which TypeScript doesn't ship.
@@ -39,31 +40,32 @@ function getCtor(): RecognitionCtor | null {
 export default function VoiceButton({
   onFinal,
   onInterim,
+  onNote,
   disabled,
 }: {
   onFinal: (text: string) => void;
   onInterim: (text: string) => void;
+  onNote: (note: string | null) => void;
   disabled?: boolean;
 }) {
-  const [supported, setSupported] = useState<boolean | null>(null);
+  const [ready, setReady] = useState(false);
   const [listening, setListening] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
   const rec = useRef<Recognition | null>(null);
 
   useEffect(() => {
-    setSupported(!!getCtor());
+    setReady(true);
     return () => rec.current?.stop();
   }, []);
 
   function start() {
     const Ctor = getCtor();
     if (!Ctor) {
-      setNote(
+      onNote(
         "Voice isn't available in this browser. Try Chrome or Safari, or tap the microphone on your phone's keyboard."
       );
       return;
     }
-    setNote(null);
+    onNote(null);
     const r = new Ctor();
     r.lang = "en-GB";
     r.continuous = true;
@@ -79,9 +81,9 @@ export default function VoiceButton({
     };
     r.onerror = (e) => {
       if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-        setNote("Please allow microphone access in your browser settings, then try again.");
+        onNote("Please allow microphone access in your browser settings, then try again.");
       } else if (e.error === "no-speech") {
-        setNote("We didn't hear anything. Tap the mic and try again.");
+        onNote("We didn't hear anything. Tap Voice note and try again.");
       }
     };
     r.onend = () => {
@@ -97,32 +99,35 @@ export default function VoiceButton({
     }
   }
 
-  function stop() {
-    rec.current?.stop();
-  }
-
-  if (supported === null) return null;
+  if (!ready) return null;
 
   return (
-    <div className="flex flex-col items-end">
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={listening ? stop : start}
-        aria-pressed={listening}
-        aria-label={listening ? "Stop voice note" : "Start voice note"}
-        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${
-          listening
-            ? "animate-pulse bg-red-500 text-white"
-            : "bg-accent-soft text-accent-dark hover:bg-accent/20"
-        }`}
-      >
-        <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2Z" />
-        </svg>
-        {listening ? "Listening… tap to stop" : "Voice note"}
-      </button>
-      {note ? <p className="mt-2 max-w-xs text-right text-xs text-ink/60">{note}</p> : null}
-    </div>
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={listening ? () => rec.current?.stop() : start}
+      aria-pressed={listening}
+      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold transition disabled:opacity-50 ${
+        listening
+          ? "bg-red-500 text-white shadow-[0_0_0_4px_rgba(239,68,68,.18)]"
+          : "bg-ink/[.05] text-ink/80 hover:bg-ink/[.08]"
+      }`}
+    >
+      {listening ? (
+        <>
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+          </span>
+          Listening
+          <IconStop className="h-3.5 w-3.5" />
+        </>
+      ) : (
+        <>
+          <IconMic />
+          Voice note
+        </>
+      )}
+    </button>
   );
 }

@@ -37,7 +37,7 @@ const FAQS = [
   },
   {
     q: "Can I use voice notes?",
-    a: "Yes. Tap the microphone and just talk, as messy as you like. Nicely tidies it up.",
+    a: "Yes. Tap the microphone and just talk, as messy as you like. Nicelyy tidies it up.",
   },
   {
     q: "Can I cancel?",
@@ -45,7 +45,7 @@ const FAQS = [
   },
   {
     q: "Will it make me sound like a robot?",
-    a: "No. Nicely keeps your point and your voice. It just takes the heat out and makes it clear.",
+    a: "No. Nicelyy keeps your point and your voice. It just takes the heat out and makes it clear.",
   },
 ];
 
@@ -69,11 +69,11 @@ export default function Home() {
             Say what you mean.
             <br />
             <span className="bg-gradient-to-r from-violet-300 via-pink-400 to-amber-300 bg-clip-text text-transparent">
-              Nicely.
+              Nicelyy.
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-white/75 sm:text-xl">
-            Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicely turns it
+            Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicelyy turns it
             into a <span className="font-semibold text-white">clear, calm message</span> that&apos;s ready to send.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -105,7 +105,7 @@ export default function Home() {
               </div>
               <div className="flex-1 rounded-2xl bg-brand-soft p-4 text-sm leading-relaxed ring-1 ring-accent/10">
                 <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-accent-dark">
-                  ✨ Nicely · {ex.tone}
+                  ✨ Nicelyy · {ex.tone}
                 </p>
                 {ex.after}
               </div>

@@ -74,7 +74,7 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthShell title="Try Nicely free" subtitle="3 free messages. No card needed.">
+    <AuthShell title="Try Nicelyy free" subtitle="3 free messages. No card needed.">
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block">
           <span className="text-sm font-semibold">Email</span>

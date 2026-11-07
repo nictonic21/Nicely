@@ -5,6 +5,10 @@ import Link from "next/link";
 import VoiceButton from "@/components/VoiceButton";
 import Glow from "@/components/Glow";
 import { LogoMark } from "@/components/Logo";
+import ResultPanel, { type TweakId } from "@/components/ResultPanel";
+import InstallPrompt from "@/components/InstallPrompt";
+import { loadPrefs, savePrefs, saveToHistory, takeDraft } from "@/lib/device";
+import { track } from "@/lib/analytics";
 import {
   IconAlign,
   IconArrowRight,
@@ -44,11 +48,16 @@ interface Usage {
 }
 
 interface Result {
-  message: string;
+  versions: { label: string; message: string }[];
   subject: string;
   tip: string;
   safety: "none" | "crisis";
   tone: ToneId;
+  rewriteId: string;
+  tweaksLeft: number;
+  historyId: string;
+  // What was asked, so tweaks adjust the same request.
+  request: { text: string; received: string; tone: ToneId; recipient: RecipientId; format: FormatId };
 }
 
 const TONE_ICONS: Record<ToneId, (p: { className?: string }) => JSX.Element> = {
@@ -87,7 +96,9 @@ export default function Composer({ welcome }: { welcome: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [outOfMessages, setOutOfMessages] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [selected, setSelected] = useState(0);
+  const [tweakBusy, setTweakBusy] = useState<TweakId | null>(null);
+  const [tweakNote, setTweakNote] = useState<string | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +112,46 @@ export default function Composer({ welcome }: { welcome: boolean }) {
   useEffect(() => {
     loadUsage();
   }, [loadUsage]);
+
+  // Remember their usual choices, and pick up "Use again" from history.
+  const prefsReady = useRef(false);
+  useEffect(() => {
+    const draft = takeDraft();
+    const prefs = draft ?? loadPrefs();
+    if (prefs) {
+      setTone(prefs.tone);
+      setRecipient(prefs.recipient);
+      setFormat(prefs.format);
+    }
+    if (draft) {
+      setText(draft.text);
+      if (draft.received) {
+        setReceived(draft.received);
+        setShowReceived(true);
+      }
+    }
+    prefsReady.current = true;
+  }, []);
+  useEffect(() => {
+    if (prefsReady.current) savePrefs({ tone, recipient, format });
+  }, [tone, recipient, format]);
+
+  // Keep the on-device history in step with the version they're looking at.
+  useEffect(() => {
+    if (!result) return;
+    const v = result.versions[selected] ?? result.versions[0];
+    saveToHistory({
+      id: result.historyId,
+      at: new Date().toISOString(),
+      tone: result.request.tone,
+      recipient: result.request.recipient,
+      format: result.request.format,
+      text: result.request.text,
+      received: result.request.received,
+      message: v.message,
+      subject: result.subject,
+    });
+  }, [result, selected]);
 
   const left = usage ? Math.max(0, usage.limit - usage.used) : null;
 
@@ -116,13 +167,14 @@ export default function Composer({ welcome }: { welcome: boolean }) {
     setLoading(true);
     setError(null);
     setOutOfMessages(false);
-    setCopied(false);
+    setTweakNote(null);
     revealResult();
+    const request = { text, received: showReceived ? received : "", tone, recipient, format };
     try {
       const res = await fetch("/api/rewrite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, received: showReceived ? received : "", tone, recipient, format }),
+        body: JSON.stringify(request),
       });
       const data = await res.json();
       if (res.status === 402) {
@@ -131,7 +183,19 @@ export default function Composer({ welcome }: { welcome: boolean }) {
         return;
       }
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
-      setResult({ message: data.message, subject: data.subject, tip: data.tip, safety: data.safety, tone });
+      setResult({
+        versions: data.versions,
+        subject: data.subject,
+        tip: data.tip,
+        safety: data.safety,
+        tone,
+        rewriteId: data.rewriteId,
+        tweaksLeft: data.tweaksLeft,
+        historyId: data.rewriteId,
+        request,
+      });
+      setSelected(0);
+      track("rewrite", { tone, format });
       if (data.usage && usage) setUsage({ ...usage, used: data.usage.used });
       else loadUsage();
       revealResult();
@@ -142,21 +206,43 @@ export default function Composer({ welcome }: { welcome: boolean }) {
     }
   }
 
-  async function copy() {
-    if (!result) return;
-    const full = result.subject ? `Subject: ${result.subject}\n\n${result.message}` : result.message;
+  async function tweak(id: TweakId) {
+    if (!result || tweakBusy) return;
+    setTweakBusy(id);
+    setTweakNote(null);
     try {
-      await navigator.clipboard.writeText(full);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = full;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
+      const res = await fetch("/api/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...result.request,
+          rewriteId: result.rewriteId,
+          current: result.versions[selected]?.message ?? result.versions[0].message,
+          tweak: id,
+        }),
+      });
+      const data = await res.json();
+      if (res.status === 409) {
+        setResult({ ...result, tweaksLeft: 0 });
+        setTweakNote(data.message);
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+      setResult({
+        ...result,
+        versions: data.versions,
+        subject: data.subject || result.subject,
+        tip: data.tip || result.tip,
+        safety: data.safety,
+        tweaksLeft: data.tweaksLeft,
+      });
+      setSelected(0);
+      track("tweak", { tweak: id });
+    } catch (err) {
+      setTweakNote(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setTweakBusy(null);
     }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   function startOver() {
@@ -216,6 +302,8 @@ export default function Composer({ welcome }: { welcome: boolean }) {
             </div>
           ) : null}
         </div>
+
+        <InstallPrompt />
 
         {welcome ? (
           <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
@@ -461,71 +549,23 @@ export default function Composer({ welcome }: { welcome: boolean }) {
                 </div>
               </div>
             ) : result ? (
-              <div className="space-y-4" aria-live="polite">
-                {result.safety === "crisis" ? (
-                  <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
-                    <p className="font-semibold">You don&apos;t have to deal with this on your own.</p>
-                    <p className="mt-1">
-                      Samaritans are there day or night, free, on{" "}
-                      <a className="font-semibold underline" href="tel:116123">116 123</a>. If you&apos;re in danger
-                      right now, call <a className="font-semibold underline" href="tel:999">999</a>.
-                    </p>
-                  </div>
-                ) : null}
-                <div className="gradient-card">
-                  <div className="gradient-card-inner overflow-hidden">
-                    <div className="flex items-center justify-between gap-3 border-b border-ink/[.06] px-5 py-3.5 sm:px-6">
-                      <span className="inline-flex items-center gap-2 text-sm font-bold">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white">
-                          <IconCheck className="h-3 w-3" />
-                        </span>
-                        Ready to send
-                      </span>
-                      <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-bold text-accent-dark">
-                        {toneLabel(result.tone)}
-                      </span>
-                    </div>
-                    <div className="px-5 py-5 sm:px-6">
-                      {result.subject ? (
-                        <p className="mb-4 rounded-xl bg-ink/[.03] px-3 py-2 text-sm">
-                          <span className="font-semibold text-ink/50">Subject </span>
-                          {result.subject}
-                        </p>
-                      ) : null}
-                      <p className="whitespace-pre-wrap text-[17px] leading-relaxed">{result.message}</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2 border-t border-ink/[.06] bg-ink/[.02] px-5 py-3.5 sm:px-6">
-                      <button type="button" onClick={copy} className="btn-primary px-5 py-2.5 text-sm">
-                        {copied ? <IconCheck /> : <IconCopy />}
-                        {copied ? "Copied" : "Copy message"}
-                      </button>
-                      <button type="button" onClick={submit} disabled={loading} className="btn-secondary px-4 py-2 text-sm">
-                        <IconRefresh /> Try again
-                      </button>
-                      <button
-                        type="button"
-                        onClick={startOver}
-                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-ink/60 transition hover:bg-ink/5 hover:text-ink"
-                      >
-                        <IconPlus /> New
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                {result.tip ? (
-                  <div className="flex items-start gap-3 rounded-2xl bg-brand-soft p-4 text-sm ring-1 ring-accent/10">
-                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-lg bg-white text-accent shadow-soft">
-                      <IconBulb />
-                    </span>
-                    <p className="text-ink/75">
-                      <span className="font-semibold text-ink">Why it works. </span>
-                      {result.tip}
-                    </p>
-                  </div>
-                ) : null}
+              <div className="space-y-3">
+                <ResultPanel
+                  versions={result.versions}
+                  subject={result.subject}
+                  tip={result.tip}
+                  safety={result.safety}
+                  toneLabel={toneLabel(result.tone)}
+                  selected={selected}
+                  onSelect={setSelected}
+                  tweaks={{ left: result.tweaksLeft, busy: tweakBusy, onTweak: tweak, note: tweakNote }}
+                  actions={{ onRetry: submit, onNew: startOver, busy: loading }}
+                />
                 <p className="px-1 text-xs leading-relaxed text-ink/45">
-                  Not quite right? Change the tone, or add a note to your message like &ldquo;shorter&rdquo; or
-                  &ldquo;mention Friday&rdquo;, then press Try again.
+                  Quick tweaks are free. Try again writes a fresh set and uses 1 message.{" "}
+                  <Link href="/app/history" className="font-semibold text-accent hover:underline">
+                    See your history
+                  </Link>
                 </p>
               </div>
             ) : (

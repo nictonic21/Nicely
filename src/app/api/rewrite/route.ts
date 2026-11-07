@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { getRequestUser, getUserRow } from "@/lib/auth";
-import { entitlementFor } from "@/lib/plans";
+import { entitlementFor, FREE_TWEAKS } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isFormat, isRecipient, isTone, MAX_CHARS } from "@/lib/options";
-import { rewriteMessage, RewriteDeclined } from "@/lib/rewrite";
+import { DECLINED_MESSAGE, FAILED_MESSAGE, parseRewriteBody, readJson } from "@/lib/input";
+import { inputHash, rewriteMessage, RewriteDeclined } from "@/lib/rewrite";
+import { maybeSendNudge } from "@/lib/emails";
 
 // POST /api/rewrite
 // Body: { text, received?, tone, recipient, format }
-// Uses one rewrite from the person's plan. If the AI step fails, the rewrite
-// is given back, so nobody pays for an error.
+// Uses one message from the person's plan and returns three versions. If the
+// AI step fails, the message is given back, so nobody pays for an error.
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
@@ -20,29 +21,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please log in first." }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 400 });
-  }
-
-  const text = typeof body.text === "string" ? body.text : "";
-  const received = typeof body.received === "string" ? body.received : "";
-  const { tone, recipient, format } = body;
-
-  if (!text.trim()) {
-    return NextResponse.json({ error: "Write, paste or say what you want to say first." }, { status: 400 });
-  }
-  if (text.length > MAX_CHARS || received.length > MAX_CHARS) {
-    return NextResponse.json(
-      { error: `Please keep each box under ${MAX_CHARS.toLocaleString()} characters.` },
-      { status: 400 }
-    );
-  }
-  if (!isTone(tone) || !isRecipient(recipient) || !isFormat(format)) {
-    return NextResponse.json({ error: "Please choose a tone and who it's for." }, { status: 400 });
-  }
+  const input = parseRewriteBody(await readJson(request));
+  if ("error" in input) return NextResponse.json({ error: input.error }, { status: 400 });
 
   const admin = createAdminClient();
   let row;
@@ -58,8 +38,9 @@ export async function POST(request: Request) {
     p_since: since.toISOString(),
     p_limit: plan.limit,
     p_burst: BURST_PER_MINUTE,
-    p_tone: tone,
-    p_recipient: recipient,
+    p_tone: input.tone,
+    p_recipient: input.recipient,
+    p_input_hash: await inputHash(input),
   });
   if (claimError || !claim) {
     console.error("claim_rewrite failed:", claimError);
@@ -82,27 +63,21 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await rewriteMessage({ text, received, tone, recipient, format });
+    const result = await rewriteMessage(input);
+    await maybeSendNudge(user.id, plan, claim.used, since).catch(() => {});
     return NextResponse.json({
       ...result,
+      rewriteId: claim.id,
+      tweaksLeft: FREE_TWEAKS,
       usage: { used: claim.used, limit: plan.limit, unlimited: plan.unlimited, tier: plan.tier },
     });
   } catch (err) {
-    // Give the rewrite back.
+    // Give the message back.
     await admin.from("rewrites").delete().eq("id", claim.id);
     if (err instanceof RewriteDeclined) {
-      return NextResponse.json(
-        {
-          error:
-            "We can't help with that one. Try telling us the point you want to make, and we'll help you say it well.",
-        },
-        { status: 422 }
-      );
+      return NextResponse.json({ error: DECLINED_MESSAGE }, { status: 422 });
     }
     console.error("rewrite failed:", err);
-    return NextResponse.json(
-      { error: "We couldn't rewrite that just now. You haven't been charged for it. Please try again." },
-      { status: 502 }
-    );
+    return NextResponse.json({ error: FAILED_MESSAGE }, { status: 502 });
   }
 }

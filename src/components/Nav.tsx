@@ -16,6 +16,9 @@ export default async function Nav() {
           </Link>
           {user ? (
             <>
+              <Link href="/app/history" className="hidden rounded-full px-3 py-2 text-ink/70 transition hover:bg-white hover:text-ink sm:inline">
+                History
+              </Link>
               <Link href="/account" className="rounded-full px-3 py-2 text-ink/70 transition hover:bg-white hover:text-ink">
                 Account
               </Link>

@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import type { PaidTier } from "@/lib/plans";
+import type { Interval, PaidTier } from "@/lib/plans";
 
 // Created on first use so a missing key never breaks the build.
 let stripe: Stripe | null = null;
@@ -10,24 +10,32 @@ export function getStripe(): Stripe {
   return stripe;
 }
 
-// Each plan is a Price created in the Nicelyy Stripe dashboard. Real Price IDs
-// (not prices made up at checkout) are what let customers switch plans in
-// Stripe's billing portal.
-export function priceIdFor(tier: PaidTier): string {
-  const id = {
-    starter: process.env.STRIPE_PRICE_STARTER,
-    plus: process.env.STRIPE_PRICE_PLUS,
-    unlimited: process.env.STRIPE_PRICE_UNLIMITED,
-  }[tier];
-  if (!id) throw new Error(`Stripe price for ${tier} is not set.`);
+// Each plan is a Price created in the Nicelyy Stripe dashboard. Real Price
+// IDs (not prices made up at checkout) are what let customers switch plans in
+// Stripe's billing portal. Yearly prices are optional: the yearly option only
+// shows once all three are set.
+const PRICE_ENV: Record<PaidTier, Record<Interval, string>> = {
+  starter: { month: "STRIPE_PRICE_STARTER", year: "STRIPE_PRICE_STARTER_YEARLY" },
+  plus: { month: "STRIPE_PRICE_PLUS", year: "STRIPE_PRICE_PLUS_YEARLY" },
+  unlimited: { month: "STRIPE_PRICE_UNLIMITED", year: "STRIPE_PRICE_UNLIMITED_YEARLY" },
+};
+
+export function yearlyAvailable(): boolean {
+  return Object.values(PRICE_ENV).every((p) => !!process.env[p.year]);
+}
+
+export function priceIdFor(tier: PaidTier, interval: Interval = "month"): string {
+  const id = process.env[PRICE_ENV[tier][interval]];
+  if (!id) throw new Error(`Stripe price for ${tier} (${interval}) is not set.`);
   return id;
 }
 
 export function tierForPrice(priceId: string | null | undefined): PaidTier | null {
   if (!priceId) return null;
-  if (priceId === process.env.STRIPE_PRICE_STARTER) return "starter";
-  if (priceId === process.env.STRIPE_PRICE_PLUS) return "plus";
-  if (priceId === process.env.STRIPE_PRICE_UNLIMITED) return "unlimited";
+  for (const tier of Object.keys(PRICE_ENV) as PaidTier[]) {
+    const ids = PRICE_ENV[tier];
+    if (priceId === process.env[ids.month] || priceId === process.env[ids.year]) return tier;
+  }
   return null;
 }
 

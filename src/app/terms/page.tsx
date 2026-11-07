@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Legal from "@/components/Legal";
 import { FAIR_USE_CAP, PLANS } from "@/lib/plans";
 import { CONTACT_EMAIL, LEGAL_NAME } from "@/lib/site";
+import { yearlyAvailable } from "@/lib/stripe";
 
 export const metadata: Metadata = { title: "Terms" };
 
@@ -28,15 +29,26 @@ export default function Terms() {
           Plus (£{PLANS.plus.pricePounds}/month) includes {PLANS.plus.limit}, and Unlimited
           (£{PLANS.unlimited.pricePounds}/month) has no set monthly number, subject to fair use below.
         </li>
-        <li>A message is one rewrite you receive. Rewrites that fail on our side are not counted.</li>
+        <li>
+          A message is one press of &ldquo;Say it nicelyy&rdquo; or &ldquo;Try again&rdquo;, which gives you
+          three versions to choose from. Each message comes with 3 free quick tweaks (up to 200 a month), which
+          don&apos;t use a message. Anything that fails on our side is not counted.
+        </li>
+        {yearlyAvailable() ? (
+        <li>
+          Yearly plans cost the same as 10 months, are paid upfront, and include the same number of messages each
+          month as the monthly plan.
+        </li>
+        ) : null}
+        <li>The free try on the home page is limited to one per person per day.</li>
         <li>Unused messages don't roll over to the next month.</li>
         <li>
           Plans renew monthly until you cancel. Payments are handled by Stripe. You can cancel any time
           from your account page, and keep your plan until the end of the month you've paid for.
         </li>
         <li>
-          If you change your mind, you can cancel within 14 days of first subscribing. If you haven't
-          used any paid messages, contact us and we'll refund you in full.
+          If you change your mind, you can cancel within 14 days of first subscribing . If you
+          haven&apos;t used any paid messages, contact us and we&apos;ll refund you in full.
         </li>
       </ul>
 

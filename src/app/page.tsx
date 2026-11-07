@@ -1,5 +1,7 @@
 import Link from "next/link";
 import PricingCards from "@/components/PricingCards";
+import TryIt from "@/components/TryIt";
+import { yearlyAvailable } from "@/lib/stripe";
 
 const EXAMPLES = [
   {
@@ -29,7 +31,7 @@ const EXAMPLES = [
 const FAQS = [
   {
     q: "What counts as a message?",
-    a: "Each time you press “Say it nicelyy” and get a rewrite, that's one message. If something goes wrong on our side, it isn't counted.",
+    a: "Each time you press “Say it nicelyy” you get three versions to pick from, and that's one message. Every message also comes with free quick tweaks like “Shorter” or “Softer”. If something goes wrong on our side, it isn't counted.",
   },
   {
     q: "Do you keep what I write?",
@@ -38,6 +40,14 @@ const FAQS = [
   {
     q: "Can I use voice notes?",
     a: "Yes. Tap the microphone and just talk, as messy as you like. Nicelyy tidies it up.",
+  },
+  {
+    q: "Can I try it before signing up?",
+    a: "Yes. Use the “Try it right now” box on this page, no account needed. Then sign up free for 3 more messages.",
+  },
+  {
+    q: "Is there a yearly plan?",
+    a: "Yes, pay yearly and get 12 months for the price of 10. You still get your messages topped up every month.",
   },
   {
     q: "Can I cancel?",
@@ -80,8 +90,8 @@ export default function Home() {
             <Link href="/signup" className="btn-primary px-8 py-4 text-lg">
               Try 3 messages free →
             </Link>
-            <Link href="#how" className="btn-ghost-light px-8 py-4 text-lg">
-              See how it works
+            <Link href="#try" className="btn-ghost-light px-8 py-4 text-lg">
+              Try it without signing up
             </Link>
           </div>
           <p className="mt-4 text-sm text-white/50">No card needed · Cancel any time</p>
@@ -111,6 +121,22 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Try it now */}
+      <section id="try" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-24 sm:px-6">
+        <div className="text-center">
+          <p className="eyebrow">Free · No sign-up</p>
+          <h2 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
+            Try it <span className="text-gradient">right now</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-ink/70">
+            Type something you&apos;ve been struggling to say. See what Nicelyy does with it.
+          </p>
+        </div>
+        <div className="mt-10">
+          <TryIt />
         </div>
       </section>
 
@@ -150,7 +176,7 @@ export default function Home() {
           you need more, and cancel any time.
         </p>
         <div className="mt-14">
-          <PricingCards mode="public" />
+          <PricingCards mode="public" yearly={yearlyAvailable()} />
         </div>
       </section>
 
@@ -159,7 +185,7 @@ export default function Home() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <h2 className="text-center text-4xl font-extrabold tracking-tight">Questions</h2>
           <div className="mt-10 space-y-3">
-            {FAQS.map((f) => (
+            {FAQS.filter((f) => yearlyAvailable() || !f.q.includes("yearly")).map((f) => (
               <details key={f.q} className="card group p-5 open:shadow-glow">
                 <summary className="cursor-pointer list-none font-semibold">
                   <span className="flex items-center justify-between gap-4">

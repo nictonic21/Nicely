@@ -9,7 +9,10 @@ Helps people say difficult things well: they type, paste or voice-note what they
 - Logo: designed in-house at the owner's request (speech bubble + sparkle mark, "nicelyy" wordmark with gradient final "y"). Source: `src/components/Logo.tsx` and `public/brand/`. Don't redraw or alter it without the owner asking.
 
 ## Key facts
-- Plans and limits: `src/lib/plans.ts` (the single source of truth). Free 3 total; Starter £7/10; Plus £15/30; Unlimited £20 (fair use 500/month).
+- Plans and limits: `src/lib/plans.ts` (the single source of truth). Free 3 total; Starter £7/10; Plus £15/30; Unlimited £20 (fair use 500/month). Yearly = 10x monthly, allowance still tops up monthly (`allowanceStart`). Each message returns 3 versions and includes 3 free tweaks (max 200 tweaks/month).
+- Free try on the home page: `/api/try`, one per hashed IP per day, global daily cap, optional Turnstile.
+- On-device only (never server): history, remembered choices (`src/lib/device.ts`).
+- Optional integrations switch on by env var: yearly Stripe prices, Google/Apple sign-in, Resend emails, Turnstile, Sentry (all content collection disabled in `sentry.shared.ts`). See `.env.example`.
 - AI: `src/lib/rewrite.ts`, Claude via the Anthropic SDK, structured JSON output, server-side refusal fallback.
 - Usage is claimed atomically by the `claim_rewrite` Postgres function (`supabase/schema.sql`), and refunded if the AI step fails.
 - Message content is never stored (a privacy promise in `/privacy`). Don't add logging of user text.

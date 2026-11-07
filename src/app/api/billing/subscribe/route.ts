@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getRequestUser, getUserRow } from "@/lib/auth";
 import { isPaidTier } from "@/lib/plans";
-import { getStripe, isLive, priceIdFor } from "@/lib/stripe";
+import { getStripe, isLive, priceIdFor, yearlyAvailable } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// POST /api/billing/subscribe  Body: { tier: "starter" | "plus" | "unlimited" }
+// POST /api/billing/subscribe  Body: { tier: "starter" | "plus" | "unlimited", interval?: "month" | "year" }
 // Returns a Stripe Checkout link. Anyone who already has a plan is sent to the
 // billing portal to switch instead, so nobody is ever charged twice.
 export const runtime = "nodejs";
@@ -17,13 +17,14 @@ export async function POST(request: Request) {
   const user = await getRequestUser();
   if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
-  let body: { tier?: unknown } = {};
+  let body: { tier?: unknown; interval?: unknown } = {};
   try {
     body = await request.json();
   } catch {}
   if (!isPaidTier(body.tier)) {
     return NextResponse.json({ error: "Please choose a plan." }, { status: 400 });
   }
+  const interval = body.interval === "year" && yearlyAvailable() ? "year" : "month";
   const origin = originOf(request);
 
   try {
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
       mode: "subscription",
       customer: customerId,
       client_reference_id: user.id,
-      line_items: [{ price: priceIdFor(body.tier), quantity: 1 }],
+      line_items: [{ price: priceIdFor(body.tier, interval), quantity: 1 }],
       metadata: { userId: user.id },
       subscription_data: { metadata: { userId: user.id } },
       allow_promotion_codes: true,

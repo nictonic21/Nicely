@@ -116,3 +116,31 @@ export const IconInfo = ({ className = "h-4 w-4" }: P) => (
     <path d="M12 11v5M12 8h.01" />
   </svg>
 );
+export const IconShare = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" />
+    <path d="M5 12v6.5A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V12" />
+  </svg>
+);
+export const IconClock = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+export const IconSms = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H9l-5 4V5.5Z" />
+    <path d="M8 9h8M8 12.5h5" />
+  </svg>
+);
+export const IconTrash = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13" />
+  </svg>
+);
+export const IconWand = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <path d="m4 20 11-11M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2ZM19 11l.6 1.4L21 13l-1.4.6L19 15l-.6-1.4L17 13l1.4-.6L19 11Z" />
+  </svg>
+);

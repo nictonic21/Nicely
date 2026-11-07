@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { Analytics } from "@vercel/analytics/react";
 
 const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
   },
   description:
     "Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicelyy turns it into a clear, calm message that's ready to send.",
+  applicationName: "Nicelyy",
+  appleWebApp: { capable: true, title: "Nicelyy", statusBarStyle: "default" },
   openGraph: {
     title: "Nicelyy: say difficult things the easy way",
     description:
@@ -35,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Nav />
         <div className="flex-1">{children}</div>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );

@@ -16,9 +16,19 @@ create table if not exists public.users (
   payment_status text not null default 'none', -- none | active | past_due | cancelled
   stripe_customer_id text unique,
   stripe_subscription_id text,
-  period_start timestamptz,                    -- start of the current billing month
+  period_start timestamptz,                    -- start of the current billing period
+  email_opt_out boolean not null default false, -- no tips / reminder emails
+  welcome_sent_at timestamptz,
+  free_nudge_sent_at timestamptz,
+  limit_nudge_for timestamptz,                 -- which month the "nearly out" email was for
   created_at timestamptz not null default now()
 );
+
+-- Safe to re-run on an older copy of this table.
+alter table public.users add column if not exists email_opt_out boolean not null default false;
+alter table public.users add column if not exists welcome_sent_at timestamptz;
+alter table public.users add column if not exists free_nudge_sent_at timestamptz;
+alter table public.users add column if not exists limit_nudge_for timestamptz;
 
 alter table public.users enable row level security;
 
@@ -34,8 +44,13 @@ create table if not exists public.rewrites (
   user_id uuid not null references public.users(id) on delete cascade,
   tone text,
   recipient text,
+  input_hash text,                     -- one-way fingerprint, not the words
+  refines integer not null default 0,  -- free one-tap tweaks used
   created_at timestamptz not null default now()
 );
+
+alter table public.rewrites add column if not exists input_hash text;
+alter table public.rewrites add column if not exists refines integer not null default 0;
 
 create index if not exists rewrites_user_created_idx
   on public.rewrites (user_id, created_at desc);
@@ -67,13 +82,15 @@ create trigger on_auth_user_created
 -- past the limit. Checks a short burst limit, then the plan limit, then
 -- records the rewrite. The server passes the limit and the period start, so
 -- the plan rules live in ONE place (src/lib/plans.ts).
+drop function if exists public.claim_rewrite(uuid, timestamptz, integer, integer, text, text);
 create or replace function public.claim_rewrite(
   p_user uuid,
   p_since timestamptz,
   p_limit integer,
   p_burst integer,
   p_tone text,
-  p_recipient text
+  p_recipient text,
+  p_input_hash text
 )
 returns jsonb
 language plpgsql
@@ -101,8 +118,8 @@ begin
     return jsonb_build_object('ok', false, 'reason', 'limit', 'used', v_used);
   end if;
 
-  insert into public.rewrites (user_id, tone, recipient)
-    values (p_user, p_tone, p_recipient)
+  insert into public.rewrites (user_id, tone, recipient, input_hash)
+    values (p_user, p_tone, p_recipient, p_input_hash)
     returning id into v_id;
 
   return jsonb_build_object('ok', true, 'id', v_id, 'used', v_used + 1);
@@ -110,7 +127,110 @@ end;
 $$;
 
 -- Only the server may call it.
-revoke all on function public.claim_rewrite(uuid, timestamptz, integer, integer, text, text)
+revoke all on function public.claim_rewrite(uuid, timestamptz, integer, integer, text, text, text)
   from public, anon, authenticated;
-grant execute on function public.claim_rewrite(uuid, timestamptz, integer, integer, text, text)
+grant execute on function public.claim_rewrite(uuid, timestamptz, integer, integer, text, text, text)
   to service_role;
+
+-- 5. One-tap tweaks ------------------------------------------------------------
+-- Each rewrite comes with a few free tweaks ("Shorter", "Softer"...). This
+-- uses one, atomically, only for the person's own recent rewrite of the SAME
+-- words, so a tweak can't be used as a free new rewrite.
+drop function if exists public.use_refine(uuid, uuid, text, integer);
+create or replace function public.use_refine(
+  p_user uuid,
+  p_id uuid,
+  p_input_hash text,
+  p_max integer,          -- free tweaks per message
+  p_since timestamptz,    -- start of this month's allowance
+  p_month_cap integer     -- free tweaks per month in total (keeps AI costs bounded)
+)
+returns text
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_month integer;
+  v_hit integer;
+begin
+  perform 1 from public.users where id = p_user for update;
+  select coalesce(sum(refines), 0) into v_month from public.rewrites
+    where user_id = p_user and created_at >= p_since;
+  if v_month >= p_month_cap then
+    return 'month_cap';
+  end if;
+  update public.rewrites
+     set refines = refines + 1
+   where id = p_id
+     and user_id = p_user
+     and input_hash = p_input_hash
+     and refines < p_max
+     and created_at > now() - interval '2 hours';
+  get diagnostics v_hit = row_count;
+  return case when v_hit > 0 then 'ok' else 'used' end;
+end;
+$$;
+
+revoke all on function public.use_refine(uuid, uuid, text, integer, timestamptz, integer) from public, anon, authenticated;
+grant execute on function public.use_refine(uuid, uuid, text, integer, timestamptz, integer) to service_role;
+
+-- Gives a tweak back if the AI step failed.
+create or replace function public.give_back_refine(p_id uuid)
+returns void
+language sql
+security definer set search_path = public
+as $$
+  update public.rewrites set refines = greatest(refines - 1, 0) where id = p_id;
+$$;
+
+revoke all on function public.give_back_refine(uuid) from public, anon, authenticated;
+grant execute on function public.give_back_refine(uuid) to service_role;
+
+-- 6. Free try on the home page (no account) -------------------------------------
+-- Stores a salted one-way hash of the visitor's IP address, never the
+-- address itself, and never what they wrote.
+create table if not exists public.trial_uses (
+  id bigint generated always as identity primary key,
+  ip_hash text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists trial_uses_ip_idx on public.trial_uses (ip_hash, created_at desc);
+create index if not exists trial_uses_created_idx on public.trial_uses (created_at desc);
+alter table public.trial_uses enable row level security;
+-- No policies: only the server reads and writes this table.
+
+create or replace function public.claim_trial(
+  p_ip_hash text,
+  p_per_ip integer,
+  p_daily_cap integer
+)
+returns jsonb
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_ip integer;
+  v_all integer;
+  v_id bigint;
+begin
+  -- One at a time, so the daily cap can't be overshot.
+  perform pg_advisory_xact_lock(4242);
+  -- Keep only a week of these, for privacy.
+  delete from public.trial_uses where created_at < now() - interval '7 days';
+  select count(*) into v_ip from public.trial_uses
+    where ip_hash = p_ip_hash and created_at > now() - interval '24 hours';
+  if v_ip >= p_per_ip then
+    return jsonb_build_object('ok', false, 'reason', 'used');
+  end if;
+  select count(*) into v_all from public.trial_uses
+    where created_at > now() - interval '24 hours';
+  if v_all >= p_daily_cap then
+    return jsonb_build_object('ok', false, 'reason', 'busy');
+  end if;
+  insert into public.trial_uses (ip_hash) values (p_ip_hash) returning id into v_id;
+  return jsonb_build_object('ok', true, 'id', v_id);
+end;
+$$;
+
+revoke all on function public.claim_trial(text, integer, integer) from public, anon, authenticated;
+grant execute on function public.claim_trial(text, integer, integer) to service_role;

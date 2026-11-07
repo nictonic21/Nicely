@@ -20,13 +20,14 @@ export interface FullUserRow extends UserRow {
   email: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  email_opt_out: boolean;
 }
 
 // Read the person's row, creating it if the sign-up trigger ever missed it.
 export async function getUserRow(id: string, email: string | null): Promise<FullUserRow> {
   const admin = createAdminClient();
   const cols =
-    "id, email, plan, payment_status, period_start, stripe_customer_id, stripe_subscription_id";
+    "id, email, plan, payment_status, period_start, stripe_customer_id, stripe_subscription_id, email_opt_out";
   const { data } = await admin.from("users").select(cols).eq("id", id).maybeSingle();
   if (data) return data as FullUserRow;
   await admin

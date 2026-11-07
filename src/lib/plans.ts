@@ -4,10 +4,13 @@
 export type Tier = "free" | "starter" | "plus" | "unlimited";
 export type PaidTier = Exclude<Tier, "free">;
 
+export type Interval = "month" | "year";
+
 export interface Plan {
   tier: Tier;
   name: string;
   pricePounds: number; // per month
+  yearlyPounds: number; // per year: 12 months for the price of 10
   limit: number; // rewrites per billing month (free: in total)
   unlimited: boolean; // shown to customers as "unlimited"
   blurb: string;
@@ -21,6 +24,7 @@ export const FAIR_USE_CAP = 500;
 export const PLANS: Record<Tier, Plan> = {
   free: {
     tier: "free",
+    yearlyPounds: 0,
     name: "Free",
     pricePounds: 0,
     limit: 3,
@@ -29,6 +33,7 @@ export const PLANS: Record<Tier, Plan> = {
   },
   starter: {
     tier: "starter",
+    yearlyPounds: 70,
     name: "Starter",
     pricePounds: 7,
     limit: 10,
@@ -37,6 +42,7 @@ export const PLANS: Record<Tier, Plan> = {
   },
   plus: {
     tier: "plus",
+    yearlyPounds: 150,
     name: "Plus",
     pricePounds: 15,
     limit: 30,
@@ -45,6 +51,7 @@ export const PLANS: Record<Tier, Plan> = {
   },
   unlimited: {
     tier: "unlimited",
+    yearlyPounds: 200,
     name: "Unlimited",
     pricePounds: 20,
     limit: FAIR_USE_CAP,
@@ -77,16 +84,40 @@ export interface Entitlement {
 
 const DAY = 24 * 60 * 60 * 1000;
 
+function addMonthsUTC(d: Date, k: number): Date {
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth() + k;
+  const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  return new Date(
+    Date.UTC(y, m, Math.min(d.getUTCDate(), lastDay), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds())
+  );
+}
+
+// The start of the current monthly allowance. Messages top up every month on
+// the day the plan started, for monthly AND yearly plans (a yearly plan still
+// gets its allowance each month, not once a year).
+export function allowanceStart(periodStart: Date | null, now = new Date()): Date {
+  const floor = new Date(now.getTime() - 31 * DAY);
+  if (!periodStart || periodStart > now) return floor;
+  let k =
+    (now.getUTCFullYear() - periodStart.getUTCFullYear()) * 12 + (now.getUTCMonth() - periodStart.getUTCMonth());
+  let start = addMonthsUTC(periodStart, k);
+  while (start > now && k > 0) start = addMonthsUTC(periodStart, --k);
+  return start > floor ? start : floor;
+}
+
 // Works out what someone can use right now.
-// Paid: the plan's limit per billing month. The month starts at the date
-// Stripe last renewed; never more than 31 days ago, so a missed webhook can
-// never leave a paying customer stuck at their limit.
-// Free: 3 rewrites in total.
+// Paid: the plan's limit each month. Free: 3 messages in total.
 export function entitlementFor(row: UserRow | null, now = new Date()): Entitlement {
   if (row && isActiveStatus(row.payment_status) && isPaidTier(row.plan)) {
-    const floor = new Date(now.getTime() - 31 * DAY);
-    const start = row.period_start ? new Date(row.period_start) : floor;
-    return { plan: PLANS[row.plan], since: start > floor ? start : floor };
+    const start = allowanceStart(row.period_start ? new Date(row.period_start) : null, now);
+    return { plan: PLANS[row.plan], since: start };
   }
   return { plan: PLANS.free, since: new Date(0) };
 }
+
+// Free one-tap tweaks ("Shorter", "Softer"...) that come with each message.
+export const FREE_TWEAKS = 3;
+// ...up to this many free tweaks a month in total, so even the heaviest
+// Unlimited user can never cost more in AI than they pay.
+export const MONTHLY_TWEAK_CAP = 200;

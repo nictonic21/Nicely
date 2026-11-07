@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AuthShell from "@/components/AuthShell";
+import OAuthButtons from "@/components/OAuthButtons";
+import { track } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -41,6 +43,7 @@ export default function SignupPage() {
       setStatus("idle");
       return;
     }
+    track("signup");
     if (data.session) {
       window.location.href = next;
     } else {
@@ -75,6 +78,7 @@ export default function SignupPage() {
 
   return (
     <AuthShell title="Try Nicelyy free" subtitle="3 free messages. No card needed.">
+      <OAuthButtons next={next} />
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block">
           <span className="text-sm font-semibold">Email</span>

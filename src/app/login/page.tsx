@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AuthShell from "@/components/AuthShell";
+import OAuthButtons from "@/components/OAuthButtons";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -40,6 +41,7 @@ export default function LoginPage() {
 
   return (
     <AuthShell title="Welcome back">
+      <OAuthButtons next={next} />
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block">
           <span className="text-sm font-semibold">Email</span>

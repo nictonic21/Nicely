@@ -17,6 +17,8 @@ interface Me {
   pastDue: boolean;
   hasBilling: boolean;
   periodStart: string | null;
+  yearlyAvailable: boolean;
+  emailOptOut: boolean;
 }
 
 export default function AccountClient() {
@@ -44,7 +46,10 @@ export default function AccountClient() {
     fetch("/api/billing/subscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tier: wanted }),
+      body: JSON.stringify({
+        tier: wanted,
+        interval: new URLSearchParams(window.location.search).get("interval") === "year" ? "year" : "month",
+      }),
     })
       .then((r) => r.json())
       .then((d) => {
@@ -68,6 +73,22 @@ export default function AccountClient() {
     } catch (e) {
       setError(e instanceof Error && e.message ? e.message : "Could not open billing.");
       setBusy(null);
+    }
+  }
+
+  async function setReminders(on: boolean) {
+    if (!me) return;
+    setMe({ ...me, emailOptOut: !on });
+    try {
+      const r = await fetch("/api/account/emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reminders: on }),
+      });
+      if (!r.ok) throw new Error();
+    } catch {
+      setMe({ ...me, emailOptOut: on });
+      setError("Could not save your email setting. Please try again.");
     }
   }
 
@@ -172,12 +193,38 @@ export default function AccountClient() {
             {me.tier === "free" ? "Choose a plan" : "Need more messages?"}
           </h2>
           <div className="mt-6">
-            <PricingCards mode="account" currentTier={me.tier} />
+            <PricingCards mode="account" currentTier={me.tier} yearly={me.yearlyAvailable} />
           </div>
         </section>
       ) : null}
 
-      <section className="mt-12 flex flex-wrap gap-3 border-t border-ink/10 pt-8">
+      <section className="card mt-12 divide-y divide-ink/[.06]">
+        <div className="flex items-center justify-between gap-4 p-5">
+          <div>
+            <p className="font-semibold">Tips and reminder emails</p>
+            <p className="text-sm text-ink/60">Like a heads-up when you&apos;re nearly out of messages.</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!me.emailOptOut}
+            aria-label="Tips and reminder emails"
+            onClick={() => setReminders(me.emailOptOut)}
+            className={`relative h-6 w-11 flex-none rounded-full transition ${!me.emailOptOut ? "bg-brand" : "bg-ink/20"}`}
+          >
+            <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${!me.emailOptOut ? "left-[22px]" : "left-0.5"}`} />
+          </button>
+        </div>
+        <div className="flex items-center justify-between gap-4 p-5">
+          <div>
+            <p className="font-semibold">History</p>
+            <p className="text-sm text-ink/60">Your past messages, saved on this device only.</p>
+          </div>
+          <Link href="/app/history" className="btn-secondary flex-none px-4 py-2 text-sm">Open</Link>
+        </div>
+      </section>
+
+      <section className="mt-8 flex flex-wrap gap-3">
         <button type="button" onClick={signOut} disabled={!!busy} className="btn-secondary">
           {busy === "signout" ? "Signing out…" : "Sign out"}
         </button>

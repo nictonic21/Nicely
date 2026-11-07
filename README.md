@@ -98,7 +98,7 @@ Do the steps in order. Keep a note open: you'll copy several keys into it, and p
 ### Step 8: Test everything (still in Stripe test mode)
 
 1. Open your site and sign up with your own email. Confirm it from the email.
-2. Write a message, pick a tone and press **Say it nicely**. Check the rewrite is good.
+2. Write a message, pick a tone and press **Say it nicelyy**. Check the rewrite is good.
 3. Try **Voice note** on your phone.
 4. Use all 3 free messages. You should see "You've used your free messages".
 5. Pick a plan and pay with Stripe's test card: `4242 4242 4242 4242`, any future date, any CVC.

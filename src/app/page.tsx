@@ -29,7 +29,7 @@ const EXAMPLES = [
 const FAQS = [
   {
     q: "What counts as a message?",
-    a: "Each time you press “Say it nicely” and get a rewrite, that's one message. If something goes wrong on our side, it isn't counted.",
+    a: "Each time you press “Say it nicelyy” and get a rewrite, that's one message. If something goes wrong on our side, it isn't counted.",
   },
   {
     q: "Do you keep what I write?",
@@ -66,10 +66,10 @@ export default function Home() {
             For the messages you&apos;d rather not write
           </p>
           <h1 className="mx-auto mt-7 max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-7xl">
-            Say what you mean.
+            Say it
             <br />
             <span className="bg-gradient-to-r from-violet-300 via-pink-400 to-amber-300 bg-clip-text text-transparent">
-              Nicelyy.
+              nicelyy.
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-white/75 sm:text-xl">
@@ -181,7 +181,7 @@ export default function Home() {
         <div className="relative isolate overflow-hidden rounded-[2rem] bg-brand px-6 py-16 text-center text-white shadow-glow sm:py-20">
           <div aria-hidden className="absolute -right-20 -top-20 -z-10 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
           <div aria-hidden className="absolute -bottom-24 -left-16 -z-10 h-72 w-72 rounded-full bg-night/30 blur-3xl" />
-          <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Next time, say it nicely.</h2>
+          <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Next time, say it nicelyy.</h2>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/85">
             The calm, clear words you wish you&apos;d thought of, in seconds.
           </p>

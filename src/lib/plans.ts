@@ -49,7 +49,7 @@ export const PLANS: Record<Tier, Plan> = {
     pricePounds: 20,
     limit: FAIR_USE_CAP,
     unlimited: true,
-    blurb: "Say it nicely, every time.",
+    blurb: "Say it nicelyy, every time.",
   },
 };
 

@@ -411,7 +411,7 @@ export default function Composer({ welcome }: { welcome: boolean }) {
                 }
               >
                 <IconSparkle className="h-5 w-5" />
-                {loading ? "Writing your message…" : result ? "Try another version" : "Say it nicely"}
+                {loading ? "Writing your message…" : result ? "Try another version" : "Say it nicelyy"}
               </button>
               <p className="mt-2.5 text-center text-xs text-ink/45">
                 Uses 1 message<span className="hidden sm:inline"> · Press Ctrl + Enter to send</span>

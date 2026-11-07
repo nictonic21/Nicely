@@ -52,7 +52,7 @@ export default async function OpengraphImage() {
           </div>
         </div>
         <div style={{ display: "flex", marginTop: 48, fontSize: 76, fontWeight: 800, lineHeight: 1.05, letterSpacing: "-0.03em" }}>
-          Say what you mean, nicely.
+          Say it nicelyy.
         </div>
         <div style={{ display: "flex", marginTop: 24, fontSize: 34, color: "rgba(255,255,255,.75)" }}>
           Type it, paste it or say it. Get a calm, clear message, ready to send.

@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  @apply bg-cream text-ink antialiased;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-accent-dark focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink/15 bg-white px-5 py-2.5 font-semibold text-ink transition hover:border-ink/40 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:opacity-60;
+  }
+  .card {
+    @apply rounded-3xl border border-ink/10 bg-white shadow-sm;
+  }
+  .field {
+    @apply w-full rounded-2xl border-2 border-ink/10 bg-white px-4 py-3 text-base outline-none transition placeholder:text-ink/35 focus:border-accent;
+  }
+  .chip {
+    @apply rounded-full border-2 px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30;
+  }
+  .chip-off {
+    @apply border-ink/10 bg-white text-ink/70 hover:border-ink/30;
+  }
+  .chip-on {
+    @apply border-accent bg-accent-soft text-accent-dark;
+  }
+}

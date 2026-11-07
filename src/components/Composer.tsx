@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import VoiceButton from "@/components/VoiceButton";
+import Glow from "@/components/Glow";
 import {
   FORMATS,
   MAX_CHARS,
@@ -115,6 +116,8 @@ export default function Composer({ welcome }: { welcome: boolean }) {
   }
 
   return (
+    <div className="relative isolate">
+    <Glow />
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
       {welcome ? (
         <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
@@ -129,27 +132,37 @@ export default function Composer({ welcome }: { welcome: boolean }) {
         </div>
       ) : null}
 
-      <div className="flex items-end justify-between gap-4">
-        <h1 className="text-3xl font-extrabold tracking-tight">What do you want to say?</h1>
-      </div>
+      <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+        What do you want <span className="text-gradient">to say?</span>
+      </h1>
       {usage ? (
-        <p className="mt-2 text-sm text-ink/60">
-          {usage.unlimited
-            ? `${usage.planName} plan`
-            : `${left} of ${usage.limit} ${usage.tier === "free" ? "free messages" : "messages this month"} left`}
-          {usage.tier !== "unlimited" ? (
+        <div className="mt-4 inline-flex flex-wrap items-center gap-3 rounded-full border border-white/70 bg-white/80 py-1.5 pl-2 pr-4 text-sm shadow-soft backdrop-blur">
+          <span className="rounded-full bg-brand px-3 py-0.5 text-xs font-bold text-white">{usage.planName}</span>
+          {usage.unlimited ? (
+            <span className="text-ink/70">Unlimited messages</span>
+          ) : (
             <>
-              {" · "}
+              <span className="text-ink/70">
+                <strong className="text-ink">{left}</strong> of {usage.limit}{" "}
+                {usage.tier === "free" ? "free messages" : "this month"} left
+              </span>
+              <span className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-ink/10 sm:block">
+                <span
+                  className="block h-full rounded-full bg-brand"
+                  style={{ width: `${Math.min(100, ((left ?? 0) / usage.limit) * 100)}%` }}
+                />
+              </span>
               <Link href="/account" className="font-semibold text-accent hover:underline">
                 {usage.tier === "free" ? "Get more" : "Upgrade"}
               </Link>
             </>
-          ) : null}
-        </p>
+          )}
+        </div>
       ) : null}
 
       {/* Replying to something */}
-      <div className="mt-6">
+      <div className="card mt-8 p-5 sm:p-6">
+      <div>
         {showReceived ? (
           <div>
             <div className="flex items-center justify-between">
@@ -276,10 +289,12 @@ export default function Composer({ welcome }: { welcome: boolean }) {
         type="button"
         onClick={submit}
         disabled={loading || !text.trim()}
-        className="btn-primary mt-8 w-full py-4 text-lg"
+        className={`btn-primary mt-8 w-full py-4 text-lg ${loading ? "animate-shimmer" : ""}`}
+        style={loading ? { backgroundImage: "linear-gradient(90deg,#7C3AED,#DB2777,#F59E0B,#DB2777,#7C3AED)", backgroundSize: "200% 100%" } : undefined}
       >
-        {loading ? "Making it nice…" : result ? "Try another version" : "Say it nicely"}
+        {loading ? "✨ Making it nice…" : result ? "Try another version ✨" : "Say it nicely ✨"}
       </button>
+      </div>
 
       {error ? (
         <p role="alert" className="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
@@ -288,7 +303,7 @@ export default function Composer({ welcome }: { welcome: boolean }) {
       ) : null}
 
       {outOfMessages ? (
-        <div className="card mt-6 p-6 text-center">
+        <div className="gradient-card mt-6"><div className="gradient-card-inner p-6 text-center">
           <p className="text-lg font-bold">
             {usage?.tier === "free" ? "You've used your free messages" : "You've used this month's messages"}
           </p>
@@ -300,7 +315,7 @@ export default function Composer({ welcome }: { welcome: boolean }) {
           <Link href="/account" className="btn-primary mt-5">
             See plans
           </Link>
-        </div>
+        </div></div>
       ) : null}
 
       {/* Result */}
@@ -315,9 +330,10 @@ export default function Composer({ welcome }: { welcome: boolean }) {
               </p>
             </div>
           ) : null}
-          <div className="card border-2 border-accent/30 p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-accent-dark">
-              Ready to send · {TONES.find((t) => t.id === tone)?.label}
+          <div className="gradient-card">
+          <div className="gradient-card-inner p-6 sm:p-7">
+            <p className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-dark">
+              ✨ Ready to send · {TONES.find((t) => t.id === tone)?.label}
             </p>
             {result.subject ? (
               <p className="mt-3 text-sm">
@@ -334,6 +350,7 @@ export default function Composer({ welcome }: { welcome: boolean }) {
               </button>
             </div>
           </div>
+          </div>
           {result.tip ? (
             <p className="mt-3 px-2 text-sm text-ink/60">
               <span className="font-semibold text-ink/80">Why it works:</span> {result.tip}
@@ -345,6 +362,7 @@ export default function Composer({ welcome }: { welcome: boolean }) {
           </p>
         </div>
       ) : null}
+    </div>
     </div>
   );
 }

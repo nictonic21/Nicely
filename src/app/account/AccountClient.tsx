@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import PricingCards from "@/components/PricingCards";
+import Glow from "@/components/Glow";
 import { createClient } from "@/lib/supabase/client";
 import { isPaidTier, type Tier } from "@/lib/plans";
 
@@ -111,8 +112,10 @@ export default function AccountClient() {
     : null;
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <h1 className="text-3xl font-extrabold tracking-tight">Your account</h1>
+    <main className="relative isolate">
+      <Glow />
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      <h1 className="text-4xl font-extrabold tracking-tight">Your <span className="text-gradient">account</span></h1>
       <p className="mt-1 text-ink/60">{me.email}</p>
 
       {busy === "checkout" ? (
@@ -129,7 +132,7 @@ export default function AccountClient() {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <p className="text-sm text-ink/60">Your plan</p>
-            <p className="text-2xl font-bold">{me.planName}</p>
+            <p className="text-gradient text-3xl font-extrabold">{me.planName}</p>
             <p className="mt-1 text-sm text-ink/70">
               {me.unlimited
                 ? `${me.used} messages used this month`
@@ -151,7 +154,7 @@ export default function AccountClient() {
         {!me.unlimited ? (
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-ink/10">
             <div
-              className="h-full rounded-full bg-accent"
+              className="h-full rounded-full bg-brand"
               style={{ width: `${Math.min(100, (me.used / me.limit) * 100)}%` }}
             />
           </div>
@@ -187,6 +190,7 @@ export default function AccountClient() {
           {busy === "delete" ? "Deleting…" : "Delete my account"}
         </button>
       </section>
+      </div>
     </main>
   );
 }

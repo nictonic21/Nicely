@@ -1,3 +1,5 @@
+import Glow from "@/components/Glow";
+
 export default function AuthShell({
   title,
   subtitle,
@@ -8,10 +10,15 @@ export default function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-md flex-col justify-center px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
-      {subtitle ? <p className="mt-2 text-ink/70">{subtitle}</p> : null}
-      <div className="mt-8">{children}</div>
+    <main className="relative isolate">
+      <Glow />
+      <div className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-md flex-col justify-center px-4 py-12 sm:px-6">
+        <div className="card p-6 sm:p-8">
+          <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
+          {subtitle ? <p className="mt-2 text-ink/70">{subtitle}</p> : null}
+          <div className="mt-7">{children}</div>
+        </div>
+      </div>
     </main>
   );
 }

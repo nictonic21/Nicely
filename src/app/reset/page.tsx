@@ -25,7 +25,7 @@ export default function ResetPage() {
   return (
     <AuthShell title="Reset your password">
       {sent ? (
-        <div className="card p-6">
+        <div className="rounded-2xl bg-brand-soft p-5">
           <p>If there's an account for {email}, we've sent a link to set a new password.</p>
           <p className="mt-2 text-sm text-ink/60">Check your junk folder if it doesn't arrive.</p>
         </div>

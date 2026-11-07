@@ -4,32 +4,76 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 body {
   @apply bg-cream text-ink antialiased;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
+::selection {
+  background: rgba(219, 39, 119, 0.25);
+}
 
 @layer components {
+  /* Gradient text, e.g. the headline highlight. */
+  .text-gradient {
+    @apply bg-brand bg-clip-text text-transparent;
+  }
+  /* Highlighter-pen effect behind key words. */
+  .highlight {
+    background: linear-gradient(120deg, rgba(245, 158, 11, 0.45), rgba(219, 39, 119, 0.35));
+    background-size: 100% 42%;
+    background-repeat: no-repeat;
+    background-position: 0 88%;
+    padding: 0 0.12em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-accent-dark focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 font-semibold text-white shadow-glow transition duration-200 hover:-translate-y-0.5 hover:brightness-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-fuchsia-400/40 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:brightness-100;
+    background-size: 150% 100%;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink/15 bg-white px-5 py-2.5 font-semibold text-ink transition hover:border-ink/40 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/10 bg-white/80 px-5 py-2.5 font-semibold text-ink shadow-soft backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-accent/40 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:opacity-60;
   }
+  .btn-ghost-light {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-2.5 font-semibold text-white backdrop-blur transition hover:bg-white/20 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30;
+  }
+
   .card {
-    @apply rounded-3xl border border-ink/10 bg-white shadow-sm;
+    @apply rounded-3xl border border-white/70 bg-white/85 shadow-soft backdrop-blur;
   }
+  /* A card with a glowing gradient outline. Put content in .gradient-card-inner. */
+  .gradient-card {
+    @apply rounded-3xl bg-brand p-[2px] shadow-glow;
+  }
+  .gradient-card-inner {
+    @apply h-full rounded-[calc(1.5rem-2px)] bg-white;
+  }
+
   .field {
-    @apply w-full rounded-2xl border-2 border-ink/10 bg-white px-4 py-3 text-base outline-none transition placeholder:text-ink/35 focus:border-accent;
+    @apply w-full rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-base shadow-[inset_0_1px_2px_rgba(21,18,43,.04)] outline-none transition placeholder:text-ink/35 focus:border-accent focus:ring-4 focus:ring-accent/15;
   }
   .chip {
-    @apply rounded-full border-2 px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30;
+    @apply rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30;
   }
   .chip-off {
-    @apply border-ink/10 bg-white text-ink/70 hover:border-ink/30;
+    @apply border-ink/10 bg-white/90 text-ink/70 hover:-translate-y-0.5 hover:border-accent/40 hover:text-ink;
   }
   .chip-on {
-    @apply border-accent bg-accent-soft text-accent-dark;
+    @apply border-transparent bg-brand text-white shadow-glow;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-accent/15 bg-white/70 px-4 py-1.5 text-sm font-semibold text-accent-dark shadow-soft backdrop-blur;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

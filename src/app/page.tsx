@@ -52,44 +52,60 @@ const FAQS = [
 export default function Home() {
   return (
     <main>
-      {/* Hero */}
-      <section className="mx-auto max-w-5xl px-4 pb-16 pt-14 text-center sm:px-6 sm:pt-20">
-        <p className="mx-auto inline-block rounded-full bg-accent-soft px-4 py-1.5 text-sm font-semibold text-accent-dark">
-          For the messages you'd rather not write
-        </p>
-        <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
-          Say what you mean. <span className="text-accent">Nicely.</span>
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-lg text-ink/70 sm:text-xl">
-          Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicely turns it
-          into a clear, calm message that's ready to send.
-        </p>
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/signup" className="btn-primary px-8 py-4 text-lg">
-            Try 3 messages free
-          </Link>
-          <Link href="#how" className="btn-secondary px-8 py-4 text-lg">
-            See how it works
-          </Link>
+      {/* Hero: dark, with glowing colour */}
+      <section className="relative isolate overflow-hidden bg-night text-white">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -left-32 -top-40 h-[520px] w-[520px] animate-float rounded-full bg-violet-600/40 blur-3xl" />
+          <div className="absolute -right-24 top-0 h-[460px] w-[460px] animate-float rounded-full bg-pink-600/30 blur-3xl [animation-delay:-4s]" />
+          <div className="absolute bottom-[-180px] left-1/3 h-[420px] w-[420px] animate-float rounded-full bg-amber-500/25 blur-3xl [animation-delay:-8s]" />
+          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
         </div>
-        <p className="mt-3 text-sm text-ink/50">No card needed.</p>
+        <div className="mx-auto max-w-6xl px-4 pb-40 pt-16 text-center sm:px-6 sm:pt-24">
+          <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white/90 backdrop-blur">
+            <span className="h-2 w-2 rounded-full bg-brand" />
+            For the messages you&apos;d rather not write
+          </p>
+          <h1 className="mx-auto mt-7 max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-7xl">
+            Say what you mean.
+            <br />
+            <span className="bg-gradient-to-r from-violet-300 via-pink-400 to-amber-300 bg-clip-text text-transparent">
+              Nicely.
+            </span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-white/75 sm:text-xl">
+            Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicely turns it
+            into a <span className="font-semibold text-white">clear, calm message</span> that&apos;s ready to send.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link href="/signup" className="btn-primary px-8 py-4 text-lg">
+              Try 3 messages free →
+            </Link>
+            <Link href="#how" className="btn-ghost-light px-8 py-4 text-lg">
+              See how it works
+            </Link>
+          </div>
+          <p className="mt-4 text-sm text-white/50">No card needed · Cancel any time</p>
+        </div>
       </section>
 
-      {/* Examples */}
-      <section className="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
-        <div className="grid gap-5 md:grid-cols-3">
+      {/* Examples, overlapping the hero */}
+      <section className="relative z-10 mx-auto -mt-28 max-w-6xl px-4 pb-24 sm:px-6">
+        <div className="grid gap-6 md:grid-cols-3">
           {EXAMPLES.map((ex) => (
-            <div key={ex.situation} className="card flex flex-col p-5">
-              <p className="text-sm font-bold">{ex.situation}</p>
-              <div className="mt-3 rounded-2xl bg-ink/5 p-4 text-sm text-ink/70">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink/40">
-                  What you want to say
+            <div key={ex.situation} className="card flex flex-col !bg-white p-5 transition duration-300 hover:-translate-y-1 hover:shadow-glow">
+              <p className="font-bold">{ex.situation}</p>
+              <div className="mt-3 rounded-2xl bg-ink/[.04] p-4 text-sm text-ink/60">
+                <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">
+                  😤 What you want to say
                 </p>
-                {ex.before}
+                <span className="italic">&ldquo;{ex.before}&rdquo;</span>
               </div>
-              <div className="mt-3 flex-1 rounded-2xl bg-accent-soft p-4 text-sm">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-accent-dark">
-                  Nicely · {ex.tone}
+              <div className="my-2 flex justify-center">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-white shadow-glow">↓</span>
+              </div>
+              <div className="flex-1 rounded-2xl bg-brand-soft p-4 text-sm leading-relaxed ring-1 ring-accent/10">
+                <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-accent-dark">
+                  ✨ Nicely · {ex.tone}
                 </p>
                 {ex.after}
               </div>
@@ -99,22 +115,24 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section id="how" className="scroll-mt-20 bg-white py-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Three steps. About ten seconds.
+      <section id="how" className="relative isolate scroll-mt-20 overflow-hidden py-24">
+        <div aria-hidden className="absolute inset-0 -z-10 bg-brand-soft" />
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-center text-4xl font-extrabold tracking-tight sm:text-5xl">
+            Three steps. <span className="highlight">About ten seconds.</span>
           </h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <div className="mt-14 grid gap-6 md:grid-cols-3">
             {[
-              ["1", "Get it off your chest", "Type it, paste it, or tap the mic and say it out loud. Swearing allowed."],
-              ["2", "Pick a tone", "Professional, kind, firm, clear and simple, or a strong comeback."],
-              ["3", "Copy and send", "Get a calm, clear message in seconds. Copy it with one tap."],
-            ].map(([n, title, text]) => (
-              <div key={n} className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-accent text-xl font-extrabold text-white">
-                  {n}
+              ["1", "🎙️", "Get it off your chest", "Type it, paste it, or tap the mic and say it out loud. Swearing allowed."],
+              ["2", "🎚️", "Pick a tone", "Professional, kind, firm, clear and simple, or a strong comeback."],
+              ["3", "📋", "Copy and send", "Get a calm, clear message in seconds. Copy it with one tap."],
+            ].map(([n, icon, title, text]) => (
+              <div key={n} className="card relative p-7 text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-2xl shadow-glow">
+                  {icon}
                 </div>
-                <h3 className="mt-4 text-lg font-bold">{title}</h3>
+                <p className="mt-4 text-xs font-bold uppercase tracking-widest text-accent">Step {n}</p>
+                <h3 className="mt-1 text-xl font-bold">{title}</h3>
                 <p className="mt-2 text-ink/70">{text}</p>
               </div>
             ))}
@@ -123,29 +141,32 @@ export default function Home() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-20 sm:px-6">
-        <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Simple pricing
+      <section id="pricing" className="relative isolate mx-auto max-w-6xl scroll-mt-20 px-4 py-24 sm:px-6">
+        <h2 className="text-center text-4xl font-extrabold tracking-tight sm:text-5xl">
+          Simple <span className="text-gradient">pricing</span>
         </h2>
-        <p className="mx-auto mt-3 max-w-xl text-center text-ink/70">
-          Start with 3 free messages. Upgrade when you need more, and cancel any time.
+        <p className="mx-auto mt-4 max-w-xl text-center text-lg text-ink/70">
+          Start with <span className="highlight font-semibold text-ink">3 free messages</span>. Upgrade when
+          you need more, and cancel any time.
         </p>
-        <div className="mt-12">
+        <div className="mt-14">
           <PricingCards mode="public" />
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="bg-white py-20">
+      <section className="pb-24">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="text-center text-3xl font-extrabold tracking-tight">Questions</h2>
+          <h2 className="text-center text-4xl font-extrabold tracking-tight">Questions</h2>
           <div className="mt-10 space-y-3">
             {FAQS.map((f) => (
-              <details key={f.q} className="group rounded-2xl border border-ink/10 p-5">
+              <details key={f.q} className="card group p-5 open:shadow-glow">
                 <summary className="cursor-pointer list-none font-semibold">
                   <span className="flex items-center justify-between gap-4">
                     {f.q}
-                    <span className="text-accent transition group-open:rotate-45">+</span>
+                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand text-white transition group-open:rotate-45">
+                      +
+                    </span>
                   </span>
                 </summary>
                 <p className="mt-3 text-ink/70">{f.a}</p>
@@ -156,13 +177,21 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="mx-auto max-w-5xl px-4 py-20 text-center sm:px-6">
-        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Next time, say it nicely.
-        </h2>
-        <Link href="/signup" className="btn-primary mt-8 px-8 py-4 text-lg">
-          Try 3 messages free
-        </Link>
+      <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+        <div className="relative isolate overflow-hidden rounded-[2rem] bg-brand px-6 py-16 text-center text-white shadow-glow sm:py-20">
+          <div aria-hidden className="absolute -right-20 -top-20 -z-10 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
+          <div aria-hidden className="absolute -bottom-24 -left-16 -z-10 h-72 w-72 rounded-full bg-night/30 blur-3xl" />
+          <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Next time, say it nicely.</h2>
+          <p className="mx-auto mt-4 max-w-lg text-lg text-white/85">
+            The calm, clear words you wish you&apos;d thought of, in seconds.
+          </p>
+          <Link
+            href="/signup"
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-bold text-accent-dark shadow-lg transition hover:-translate-y-0.5"
+          >
+            Try 3 messages free →
+          </Link>
+        </div>
       </section>
     </main>
   );

@@ -61,7 +61,7 @@ export default function SignupPage() {
   if (status === "check-email") {
     return (
       <AuthShell title="Check your email" subtitle={`We've sent a link to ${email}.`}>
-        <div className="card p-6">
+        <div className="rounded-2xl bg-brand-soft p-5">
           <p>Tap the link in the email to confirm your account. Then you're in.</p>
           <p className="mt-2 text-sm text-ink/60">Can't see it? Check your junk or spam folder.</p>
           <button type="button" onClick={resend} className="btn-secondary mt-5">

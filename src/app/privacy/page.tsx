@@ -42,6 +42,10 @@ export default function Privacy() {
           If you use the free try without an account: a scrambled one-way version of your IP address, kept for 7
           days, so each visitor gets one free try a day.
         </li>
+        <li>
+          If you rate a rewrite: the thumbs up or down, and a reason you pick from a list (like &ldquo;Too
+          long&rdquo;). Never the words.
+        </li>
         <li>Whether you&apos;ve turned off tips and reminder emails.</li>
       </ul>
       <p>
@@ -62,6 +66,12 @@ export default function Privacy() {
         <li>Google or Apple: only if you choose to sign in with them.</li>
       </ul>
       <p>Some are based outside the UK. Where they are, your data is protected by approved safeguards, such as the UK International Data Transfer Addendum.</p>
+
+      <h2>If you contact us</h2>
+      <p>
+        Messages you send through our Help page go to our support inbox (sent by Resend), so we can reply. We keep
+        them only as long as we need to help you.
+      </p>
 
       <h2>Emails</h2>
       <p>

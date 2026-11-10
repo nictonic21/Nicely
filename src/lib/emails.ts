@@ -17,7 +17,14 @@ function configured() {
   return !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }
 
-async function send(to: string, subject: string, html: string, text: string, unsubscribe?: string) {
+async function send(
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+  unsubscribe?: string,
+  replyTo?: string
+) {
   if (!configured()) return false;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4000);
@@ -34,6 +41,7 @@ async function send(to: string, subject: string, html: string, text: string, uns
         subject,
         html,
         text,
+        ...(replyTo ? { reply_to: replyTo } : {}),
         ...(unsubscribe
           ? {
               headers: {
@@ -154,4 +162,29 @@ export async function maybeSendNudge(userId: string, plan: Plan, used: number, s
       unsub
     );
   }
+}
+
+// Contact form: sends the message to your support inbox, with "reply" going
+// straight back to the customer.
+export function contactConfigured() {
+  return configured() && !!process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+}
+
+const esc = (t: string) =>
+  t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+export async function sendContactMessage(opts: {
+  from: string;
+  name: string;
+  topic: string;
+  message: string;
+  account: { id: string; plan: string } | null;
+}) {
+  const to = process.env.NEXT_PUBLIC_CONTACT_EMAIL!;
+  const who = opts.name ? `${opts.name} <${opts.from}>` : opts.from;
+  const acct = opts.account ? `Account: ${opts.account.id} (${opts.account.plan})` : "Not logged in";
+  const subject = `[Nicelyy help] ${opts.topic}: ${opts.from}`;
+  const text = `From: ${who}\nTopic: ${opts.topic}\n${acct}\n\n${opts.message}`;
+  const html = `<p><b>From:</b> ${esc(who)}<br><b>Topic:</b> ${esc(opts.topic)}<br>${esc(acct)}</p><p style="white-space:pre-wrap">${esc(opts.message)}</p>`;
+  return send(to, subject, html, text, undefined, opts.from);
 }

@@ -222,6 +222,13 @@ export default function AccountClient() {
           </div>
           <Link href="/app/history" className="btn-secondary flex-none px-4 py-2 text-sm">Open</Link>
         </div>
+        <div className="flex items-center justify-between gap-4 p-5">
+          <div>
+            <p className="font-semibold">Help</p>
+            <p className="text-sm text-ink/60">Answers to common questions, or get in touch.</p>
+          </div>
+          <Link href="/help" className="btn-secondary flex-none px-4 py-2 text-sm">Get help</Link>
+        </div>
       </section>
 
       <section className="mt-8 flex flex-wrap gap-3">

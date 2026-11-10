@@ -8,10 +8,15 @@ export const metadata: Metadata = { title: "Terms" };
 
 export default function Terms() {
   return (
-    <Legal title="Terms of use" updated="7 November 2026">
+    <Legal title="Terms of use" updated="10 November 2026">
       <p>
         These terms cover your use of Nicelyy, run by {LEGAL_NAME} (&ldquo;we&rdquo;). By creating an
         account you agree to them.
+      </p>
+
+      <h2>Who can use Nicelyy</h2>
+      <p>
+        You must be 18 or over to create an account or buy a plan. Accounts are for one person&apos;s own use.
       </p>
 
       <h2>What Nicelyy does</h2>

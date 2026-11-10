@@ -17,4 +17,8 @@ Helps people say difficult things well: they type, paste or voice-note what they
 - Usage is claimed atomically by the `claim_rewrite` Postgres function (`supabase/schema.sql`), and refunded if the AI step fails.
 - Message content is never stored (a privacy promise in `/privacy`). Don't add logging of user text.
 - Plans change only through the Stripe webhook (`src/app/api/stripe/webhook`).
+- Owner dashboard `/admin` (emails in `ADMIN_EMAILS`), numbers from `admin_stats()` + Stripe `getRevenue()`.
+- Help page `/help` with contact form (`/api/contact`, Resend, rate-limited by `hit_rate_limit`).
+- Thumbs up/down stored as `rating` + fixed `rating_reason` on `rewrites`, never text.
+- Tests: `npm test` (unit + DB, DB needs `DATABASE_URL`), `npm run test:e2e` (Playwright, mocked APIs). CI in `.github/workflows/ci.yml`. Keep them green; add tests with new features.
 - The go-live steps are in README.md.

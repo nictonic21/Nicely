@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 
 // Keeps the login session fresh, and sends signed-out visitors to sign up
 // before they can use the app.
-const PROTECTED = ["/app", "/account"];
+const PROTECTED = ["/app", "/account", "/admin"];
 
 export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

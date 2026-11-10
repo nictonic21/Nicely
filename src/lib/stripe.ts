@@ -59,3 +59,31 @@ export function periodStartOf(sub: Stripe.Subscription): string | null {
 export function isLive(sub: Stripe.Subscription): boolean {
   return sub.status !== "canceled" && sub.status !== "incomplete_expired";
 }
+
+// Monthly recurring revenue straight from Stripe (the source of truth), for
+// the owner dashboard. Yearly plans count as a twelfth per month. Prices are
+// VAT-inclusive, so this is the amount customers pay, before Stripe's fees.
+export async function getRevenue(): Promise<{ mrrPence: number; subscriptions: number; yearly: number } | null> {
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  let mrr = 0;
+  let subscriptions = 0;
+  let yearly = 0;
+  for (const status of ["active", "past_due"] as const) {
+    for await (const sub of getStripe().subscriptions.list({ status, limit: 100 })) {
+      subscriptions++;
+      for (const item of sub.items.data) {
+        const price = item.price;
+        const amount = (price.unit_amount ?? 0) * (item.quantity ?? 1);
+        const every = price.recurring?.interval_count ?? 1;
+        if (price.recurring?.interval === "year") {
+          yearly++;
+          mrr += amount / (12 * every);
+        } else if (price.recurring?.interval === "month") {
+          mrr += amount / every;
+        }
+      }
+      if (subscriptions >= 5000) break;
+    }
+  }
+  return { mrrPence: Math.round(mrr), subscriptions, yearly };
+}

@@ -1,24 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import ResultPanel from "@/components/ResultPanel";
 import { IconArrowRight, IconInfo, IconSparkle } from "@/components/Icons";
 import { TONES, type ToneId } from "@/lib/options";
 import { track } from "@/lib/analytics";
+import Turnstile, { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/Turnstile";
 
 // The free try on the home page. No account needed.
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (el: HTMLElement, opts: Record<string, unknown>) => string;
-      reset: (id?: string) => void;
-    };
-  }
-}
-
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 const EXAMPLE = "my landlord still hasn't fixed the boiler after 3 weeks, im sick of being ignored and freezing";
 
 interface Result {
@@ -37,29 +28,7 @@ export default function TryIt() {
   const [result, setResult] = useState<Result | null>(null);
   const [selected, setSelected] = useState(0);
   const [token, setToken] = useState<string | null>(null);
-  const widget = useRef<HTMLDivElement>(null);
-  const widgetId = useRef<string | undefined>(undefined);
-
-  // Load Cloudflare's "are you human" check, only if it's switched on.
-  useEffect(() => {
-    if (!SITE_KEY) return;
-    const render = () => {
-      if (window.turnstile && widget.current && !widgetId.current) {
-        widgetId.current = window.turnstile.render(widget.current, {
-          sitekey: SITE_KEY,
-          callback: (t: string) => setToken(t),
-          "expired-callback": () => setToken(null),
-          appearance: "interaction-only",
-        });
-      }
-    };
-    if (window.turnstile) return render();
-    const s = document.createElement("script");
-    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-    s.async = true;
-    s.onload = render;
-    document.head.appendChild(s);
-  }, []);
+  const check = useRef<TurnstileHandle>(null);
 
   async function submit() {
     if (loading || !text.trim()) return;
@@ -75,10 +44,7 @@ export default function TryIt() {
       const data = await res.json();
       if (!res.ok) {
         if (data.signUp) setSignUpNudge(true);
-        if (data.retryCheck) {
-          window.turnstile?.reset(widgetId.current);
-          setToken(null);
-        }
+        if (data.retryCheck) check.current?.reset();
         throw new Error(data.error || "Something went wrong. Please try again.");
       }
       setResult(data);
@@ -91,7 +57,7 @@ export default function TryIt() {
     }
   }
 
-  const waitingForCheck = !!SITE_KEY && !token;
+  const waitingForCheck = !!TURNSTILE_SITE_KEY && !token;
 
   return (
     <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
@@ -124,7 +90,7 @@ export default function TryIt() {
             </button>
           ))}
         </div>
-        <div ref={widget} className="mt-4" />
+        <Turnstile ref={check} onToken={setToken} className="mt-4" />
         <button
           type="button"
           onClick={submit}

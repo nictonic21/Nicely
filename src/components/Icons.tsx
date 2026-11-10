@@ -144,3 +144,13 @@ export const IconWand = ({ className = "h-4 w-4" }: P) => (
     <path d="m4 20 11-11M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2ZM19 11l.6 1.4L21 13l-1.4.6L19 15l-.6-1.4L17 13l1.4-.6L19 11Z" />
   </svg>
 );
+export const IconThumbUp = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <path d="M7 11v9H4.5A1.5 1.5 0 0 1 3 18.5v-6A1.5 1.5 0 0 1 4.5 11H7Zm0 0 3.6-7.2a1.9 1.9 0 0 1 3.6 1V9h4.6a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.6 20H7" />
+  </svg>
+);
+export const IconThumbDown = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <path d="M17 13V4h2.5A1.5 1.5 0 0 1 21 5.5v6a1.5 1.5 0 0 1-1.5 1.5H17Zm0 0-3.6 7.2a1.9 1.9 0 0 1-3.6-1V15H5.2a2 2 0 0 1-2-2.3l1.2-7A2 2 0 0 1 6.4 4H17" />
+  </svg>
+);

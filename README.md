@@ -157,6 +157,24 @@ This needs a paid Apple Developer account (£79/year). Follow Supabase's guide u
 3. Optional, for clearer error details: create an auth token in Sentry and add `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT`.
 4. Nicelyy is set up so error reports never include what people write.
 
+### Your owner dashboard
+1. In Vercel, add `ADMIN_EMAILS` with the email you log in with, then redeploy.
+2. Log in and go to `https://YOUR-SITE/admin`. You'll see monthly revenue, paying customers by plan, sign-ups, messages per day, free-try conversion, and which tones people like.
+3. Everyone else sees "page not found" there.
+
+---
+
+## Automatic checks (tests)
+
+Every time code is pushed to GitHub, the **Checks** workflow runs by itself and shows a green tick or a red cross on the repository page. It checks:
+- the code has no type errors,
+- 25 unit tests (plan limits, monthly top-ups, payments, AI reply handling, signed links),
+- 9 database tests that run `supabase/schema.sql` on a real database and check every limit,
+- the site builds,
+- 12 browser tests that click through the site on a computer and a phone, using pretend AI and payments, so they cost nothing.
+
+Running them yourself (on a computer with the code): `npm test`, then `npm run build` and `npm run test:e2e`.
+
 ---
 
 ## Before you launch: checklist
@@ -164,6 +182,10 @@ This needs a paid Apple Developer account (£79/year). Follow Supabase's guide u
 - [ ] Ask a solicitor to review `/terms` and `/privacy`. They're solid drafts, not legal advice.
 - [ ] Register with the ICO (data protection fee, about £40–£60 a year): ico.org.uk
 - [ ] Set a monthly spend limit in the Anthropic console.
+- [ ] Check the **Checks** tick on GitHub is green.
+- [ ] Upgrade Supabase to the paid plan for daily backups.
+- [ ] Set up free uptime monitoring (uptimerobot.com) for your site address.
+- [ ] Trademark "Nicelyy" with the UK IPO.
 
 ## Running costs (rough)
 

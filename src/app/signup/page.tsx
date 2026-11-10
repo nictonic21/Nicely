@@ -96,7 +96,7 @@ export default function SignupPage() {
           {status === "loading" ? "Creating your account…" : "Create account"}
         </button>
         <p className="text-center text-xs text-ink/50">
-          By creating an account you agree to our{" "}
+          By creating an account you confirm you&apos;re 18 or over and agree to our{" "}
           <Link href="/terms" className="underline">Terms</Link> and{" "}
           <Link href="/privacy" className="underline">Privacy Policy</Link>.
         </p>

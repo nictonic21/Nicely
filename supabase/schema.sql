@@ -51,6 +51,11 @@ create table if not exists public.rewrites (
 
 alter table public.rewrites add column if not exists input_hash text;
 alter table public.rewrites add column if not exists refines integer not null default 0;
+-- Thumbs up/down on a rewrite: just the rating and a reason from a fixed
+-- list, never the words.
+alter table public.rewrites add column if not exists rating smallint check (rating in (-1, 1));
+alter table public.rewrites add column if not exists rating_reason text
+  check (rating_reason in ('too_long', 'wrong_tone', 'missed_point', 'robotic', 'other'));
 
 create index if not exists rewrites_user_created_idx
   on public.rewrites (user_id, created_at desc);
@@ -234,3 +239,88 @@ $$;
 
 revoke all on function public.claim_trial(text, integer, integer) from public, anon, authenticated;
 grant execute on function public.claim_trial(text, integer, integer) to service_role;
+
+-- 7. General rate limiter (contact form and similar) ---------------------------
+-- Counts recent hits for a key (e.g. a hashed IP) and refuses once the limit
+-- for the time window is reached. Stores no personal data in plain form.
+create table if not exists public.rate_hits (
+  id bigint generated always as identity primary key,
+  key text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists rate_hits_key_idx on public.rate_hits (key, created_at desc);
+alter table public.rate_hits enable row level security;
+-- No policies: only the server reads and writes this table.
+
+create or replace function public.hit_rate_limit(p_key text, p_window_seconds integer, p_max integer)
+returns boolean
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_count integer;
+begin
+  perform pg_advisory_xact_lock(hashtext(p_key));
+  delete from public.rate_hits where created_at < now() - interval '2 days';
+  select count(*) into v_count from public.rate_hits
+    where key = p_key and created_at > now() - make_interval(secs => p_window_seconds);
+  if v_count >= p_max then
+    return false;
+  end if;
+  insert into public.rate_hits (key) values (p_key);
+  return true;
+end;
+$$;
+
+revoke all on function public.hit_rate_limit(text, integer, integer) from public, anon, authenticated;
+grant execute on function public.hit_rate_limit(text, integer, integer) to service_role;
+
+-- 8. Owner dashboard numbers -----------------------------------------------------
+-- Counts only, for the private /admin page. Days are UK days.
+create or replace function public.admin_stats()
+returns jsonb
+language sql
+security definer set search_path = public
+as $$
+  with today as (select date_trunc('day', now() at time zone 'Europe/London') as d)
+  select jsonb_build_object(
+    'users_total',    (select count(*) from public.users),
+    'signups_7d',     (select count(*) from public.users where created_at > now() - interval '7 days'),
+    'signups_30d',    (select count(*) from public.users where created_at > now() - interval '30 days'),
+    'paying',         (select coalesce(jsonb_object_agg(plan, n), '{}'::jsonb) from (
+                         select plan, count(*) n from public.users
+                          where payment_status in ('active', 'past_due') and plan is not null
+                          group by plan) t),
+    'past_due',       (select count(*) from public.users where payment_status = 'past_due'),
+    'active_users_7d',(select count(distinct user_id) from public.rewrites where created_at > now() - interval '7 days'),
+    'messages_today', (select count(*) from public.rewrites, today
+                        where (created_at at time zone 'Europe/London') >= today.d),
+    'messages_7d',    (select count(*) from public.rewrites where created_at > now() - interval '7 days'),
+    'messages_30d',   (select count(*) from public.rewrites where created_at > now() - interval '30 days'),
+    'tweaks_30d',     (select coalesce(sum(refines), 0) from public.rewrites where created_at > now() - interval '30 days'),
+    'trials_7d',      (select count(*) from public.trial_uses where created_at > now() - interval '7 days'),
+    'daily',          (select jsonb_agg(jsonb_build_object('day', to_char(g.d, 'YYYY-MM-DD'), 'n', coalesce(r.n, 0)) order by g.d)
+                         from today,
+                              generate_series(today.d - interval '13 days', today.d, interval '1 day') as g(d)
+                         left join (
+                           select date_trunc('day', created_at at time zone 'Europe/London') as d, count(*) n
+                             from public.rewrites
+                            where created_at > now() - interval '15 days'
+                            group by 1) r on r.d = g.d),
+    'tones',          (select coalesce(jsonb_agg(t order by t.n desc), '[]'::jsonb) from (
+                         select tone, count(*) n,
+                                count(*) filter (where rating = 1) as up,
+                                count(*) filter (where rating = -1) as down
+                           from public.rewrites
+                          where created_at > now() - interval '30 days'
+                          group by tone) t),
+    'reasons',        (select coalesce(jsonb_object_agg(rating_reason, n), '{}'::jsonb) from (
+                         select rating_reason, count(*) n from public.rewrites
+                          where rating = -1 and rating_reason is not null
+                            and created_at > now() - interval '30 days'
+                          group by rating_reason) t)
+  );
+$$;
+
+revoke all on function public.admin_stats() from public, anon, authenticated;
+grant execute on function public.admin_stats() to service_role;

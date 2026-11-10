@@ -66,6 +66,10 @@ export default function OAuthButtons({ next }: { next: string }) {
           </button>
         ) : null}
       </div>
+      <p className="mt-2.5 text-center text-xs text-ink/45">
+        By continuing you confirm you&apos;re 18 or over and agree to our{" "}
+        <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+      </p>
       {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-ink/35">
         <span className="h-px flex-1 bg-ink/10" /> or use email <span className="h-px flex-1 bg-ink/10" />

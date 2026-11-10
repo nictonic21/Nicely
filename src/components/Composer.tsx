@@ -7,6 +7,7 @@ import Glow from "@/components/Glow";
 import { LogoMark } from "@/components/Logo";
 import ResultPanel, { type TweakId } from "@/components/ResultPanel";
 import InstallPrompt from "@/components/InstallPrompt";
+import RateRewrite from "@/components/RateRewrite";
 import { loadPrefs, savePrefs, saveToHistory, takeDraft } from "@/lib/device";
 import { track } from "@/lib/analytics";
 import {
@@ -561,6 +562,7 @@ export default function Composer({ welcome }: { welcome: boolean }) {
                   tweaks={{ left: result.tweaksLeft, busy: tweakBusy, onTweak: tweak, note: tweakNote }}
                   actions={{ onRetry: submit, onNew: startOver, busy: loading }}
                 />
+                <RateRewrite rewriteId={result.rewriteId} />
                 <p className="px-1 text-xs leading-relaxed text-ink/45">
                   Quick tweaks are free. Try again writes a fresh set and uses 1 message.{" "}
                   <Link href="/app/history" className="font-semibold text-accent hover:underline">

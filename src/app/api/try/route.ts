@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { DECLINED_MESSAGE, FAILED_MESSAGE, parseRewriteBody, readJson } from "@/lib/input";
 import { rewriteMessage, RewriteDeclined } from "@/lib/rewrite";
 import { sign } from "@/lib/secret";
+import { clientIp, humanCheck } from "@/lib/request";
 
 // POST /api/try
 // One free rewrite from the home page, no account needed.
@@ -14,27 +15,6 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const TRIAL_MAX_CHARS = 1200;
-
-function clientIp(request: Request): string {
-  const fwd = request.headers.get("x-forwarded-for");
-  return (fwd?.split(",")[0] || request.headers.get("x-real-ip") || "unknown").trim();
-}
-
-async function humanCheck(token: unknown, ip: string): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true; // Not switched on yet.
-  if (typeof token !== "string" || !token) return false;
-  try {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      body: new URLSearchParams({ secret, response: token, remoteip: ip }),
-    });
-    const data = (await res.json()) as { success?: boolean };
-    return !!data.success;
-  } catch {
-    return false;
-  }
-}
 
 const signUp = (error: string, status: number) =>
   NextResponse.json({ error, signUp: true }, { status });

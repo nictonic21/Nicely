@@ -20,8 +20,11 @@ const signUp = (error: string, status: number) =>
   NextResponse.json({ error, signUp: true }, { status });
 
 export async function POST(request: Request) {
-  if (!process.env.NICELYY_SECRET) {
-    return signUp("Create a free account to try Nicelyy. It takes a few seconds.", 503);
+  if (!process.env.NICELYY_SECRET || !process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json(
+      { error: "The free try opens very soon. Please check back shortly." },
+      { status: 503 }
+    );
   }
   const body = await readJson(request);
   const input = parseRewriteBody(body);

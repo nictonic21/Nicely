@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import AuthShell from "@/components/AuthShell";
 import OAuthButtons from "@/components/OAuthButtons";
-import { createClient } from "@/lib/supabase/client";
+import { AUTH_NOT_READY, AUTH_READY, createClient, friendlyError, withTimeout } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,7 +26,14 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error: err } = await createClient().auth.signInWithPassword({ email, password });
+    let err;
+    try {
+      ({ error: err } = await withTimeout(createClient().auth.signInWithPassword({ email, password })));
+    } catch (e) {
+      setError(friendlyError(e, "Could not log you in. Please try again."));
+      setLoading(false);
+      return;
+    }
     if (err) {
       setError(
         err.message === "Email not confirmed"
@@ -42,6 +49,9 @@ export default function LoginPage() {
   return (
     <AuthShell title="Welcome back">
       <OAuthButtons next={next} />
+      {!AUTH_READY ? (
+        <p className="mb-5 rounded-2xl bg-brand-soft p-4 text-sm text-ink/80">{AUTH_NOT_READY}</p>
+      ) : null}
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block">
           <span className="text-sm font-semibold">Email</span>
@@ -54,7 +64,7 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)} className="field mt-1" />
         </label>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button type="submit" disabled={loading} className="btn-primary w-full">
+        <button type="submit" disabled={loading || !AUTH_READY} className="btn-primary w-full">
           {loading ? "Logging in…" : "Log in"}
         </button>
         <p className="text-center text-sm">

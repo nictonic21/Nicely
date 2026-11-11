@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { AUTH_READY, createClient } from "@/lib/supabase/client";
 
 // "Continue with Google / Apple". Each button only appears once that provider
 // is switched on in Supabase AND listed in NEXT_PUBLIC_AUTH_PROVIDERS
@@ -18,15 +18,20 @@ export function oauthEnabled() {
 export default function OAuthButtons({ next }: { next: string }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  if (!ENABLED.length) return null;
+  if (!ENABLED.length || !AUTH_READY) return null;
 
   async function go(provider: "google" | "apple") {
     setBusy(provider);
     setError(null);
-    const { error: err } = await createClient().auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
-    });
+    let err: unknown = null;
+    try {
+      ({ error: err } = await createClient().auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      }));
+    } catch (e) {
+      err = e;
+    }
     if (err) {
       setError("That didn't work. Please try again, or use your email instead.");
       setBusy(null);

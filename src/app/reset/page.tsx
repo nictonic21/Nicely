@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import AuthShell from "@/components/AuthShell";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, friendlyError, withTimeout } from "@/lib/supabase/client";
 
 export default function ResetPage() {
   const [email, setEmail] = useState("");
@@ -14,12 +14,18 @@ export default function ResetPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error: err } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset/update`,
-    });
+    try {
+      const { error: err } = await withTimeout(
+        createClient().auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/callback?next=/reset/update`,
+        })
+      );
+      if (err) setError(err.message);
+      else setSent(true);
+    } catch (e) {
+      setError(friendlyError(e));
+    }
     setLoading(false);
-    if (err) setError(err.message);
-    else setSent(true);
   }
 
   return (

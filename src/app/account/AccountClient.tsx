@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import PricingCards from "@/components/PricingCards";
 import Glow from "@/components/Glow";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, withTimeout } from "@/lib/supabase/client";
 import { isPaidTier, type Tier } from "@/lib/plans";
 
 interface Me {
@@ -94,7 +94,9 @@ export default function AccountClient() {
 
   async function signOut() {
     setBusy("signout");
-    await createClient().auth.signOut();
+    try {
+      await withTimeout(createClient().auth.signOut(), 10000);
+    } catch {}
     window.location.href = "/";
   }
 
@@ -109,7 +111,9 @@ export default function AccountClient() {
       const r = await fetch("/api/account/delete", { method: "POST" });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
-      await createClient().auth.signOut();
+      try {
+        await withTimeout(createClient().auth.signOut(), 10000);
+      } catch {}
       window.location.href = "/";
     } catch (e) {
       setError(e instanceof Error && e.message ? e.message : "Could not delete your account.");

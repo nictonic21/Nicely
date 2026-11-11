@@ -76,3 +76,12 @@ test("no page scrolls sideways", async ({ page }) => {
     expect(overflow, path).toBe(false);
   }
 });
+
+test("sign-up and log-in explain clearly when accounts aren't switched on yet", async ({ page }) => {
+  // The test build has no account keys, like a fresh deploy before setup.
+  for (const path of ["/signup", "/login"]) {
+    await page.goto(path);
+    await expect(page.getByText("Accounts aren't open yet")).toBeVisible();
+    await expect(page.locator("form button[type=submit]")).toBeDisabled();
+  }
+});

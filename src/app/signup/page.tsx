@@ -5,7 +5,7 @@ import Link from "next/link";
 import AuthShell from "@/components/AuthShell";
 import OAuthButtons from "@/components/OAuthButtons";
 import { track } from "@/lib/analytics";
-import { createClient } from "@/lib/supabase/client";
+import { AUTH_NOT_READY, AUTH_READY, createClient, friendlyError, withTimeout } from "@/lib/supabase/client";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -27,11 +27,17 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     setStatus("loading");
-    const { data, error: err } = await createClient().auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: redirectTo() },
-    });
+    let result;
+    try {
+      result = await withTimeout(
+        createClient().auth.signUp({ email, password, options: { emailRedirectTo: redirectTo() } })
+      );
+    } catch (e) {
+      setError(friendlyError(e, "Could not create your account. Please try again."));
+      setStatus("idle");
+      return;
+    }
+    const { data, error: err } = result;
     if (err) {
       setError(err.message);
       setStatus("idle");
@@ -53,12 +59,14 @@ export default function SignupPage() {
 
   async function resend() {
     setResendNote(null);
-    const { error: err } = await createClient().auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: redirectTo() },
-    });
-    setResendNote(err ? err.message : "Sent again. Check your junk folder too.");
+    try {
+      const { error: err } = await withTimeout(
+        createClient().auth.resend({ type: "signup", email, options: { emailRedirectTo: redirectTo() } })
+      );
+      setResendNote(err ? err.message : "Sent again. Check your junk folder too.");
+    } catch (e) {
+      setResendNote(friendlyError(e));
+    }
   }
 
   if (status === "check-email") {
@@ -79,6 +87,9 @@ export default function SignupPage() {
   return (
     <AuthShell title="Try Nicelyy free" subtitle="3 free messages. No card needed.">
       <OAuthButtons next={next} />
+      {!AUTH_READY ? (
+        <p className="mb-5 rounded-2xl bg-brand-soft p-4 text-sm text-ink/80">{AUTH_NOT_READY}</p>
+      ) : null}
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block">
           <span className="text-sm font-semibold">Email</span>
@@ -92,7 +103,7 @@ export default function SignupPage() {
           <span className="mt-1 block text-xs text-ink/50">At least 8 characters.</span>
         </label>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button type="submit" disabled={status === "loading"} className="btn-primary w-full">
+        <button type="submit" disabled={status === "loading" || !AUTH_READY} className="btn-primary w-full">
           {status === "loading" ? "Creating your account…" : "Create account"}
         </button>
         <p className="text-center text-xs text-ink/50">

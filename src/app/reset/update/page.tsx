@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import AuthShell from "@/components/AuthShell";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, withTimeout } from "@/lib/supabase/client";
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("");
@@ -13,7 +13,12 @@ export default function UpdatePasswordPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error: err } = await createClient().auth.updateUser({ password });
+    let err: unknown = null;
+    try {
+      ({ error: err } = await withTimeout(createClient().auth.updateUser({ password })));
+    } catch (e) {
+      err = e;
+    }
     if (err) {
       setError("That link has expired. Please request a new one from the reset page.");
       setLoading(false);

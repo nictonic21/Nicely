@@ -13,13 +13,13 @@ export const metadata: Metadata = {
     template: "%s · Nicelyy",
   },
   description:
-    "Angry, awkward or lost for words? Type it, paste it or say it out loud. Nicelyy turns it into a clear, calm message that's ready to send.",
+    "The awkward reply. The difficult conversation. The email that needs a little less attitude. Nicelyy helps you find just the right words.",
   applicationName: "Nicelyy",
   appleWebApp: { capable: true, title: "Nicelyy", statusBarStyle: "default" },
   openGraph: {
-    title: "Nicelyy: say difficult things the easy way",
+    title: "Nicelyy: got something to say? Say it Nicelyy.",
     description:
-      "Type it, paste it or say it out loud. Nicelyy turns it into a clear, calm message that's ready to send.",
+      "Got something to say? Say it Nicelyy. Write messages, craft replies and find just the right words.",
     type: "website",
     locale: "en_GB",
   },

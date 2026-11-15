@@ -8,12 +8,14 @@ import { TONES, type ToneId } from "@/lib/options";
 import { track } from "@/lib/analytics";
 import Turnstile, { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/Turnstile";
 
-// The free try on the home page. No account needed.
+// The free try on the home page. No account needed. A taster: version 1 in
+// full, versions 2 and 3 locked until they sign up. One per browser a month.
 
 const EXAMPLE = "my landlord still hasn't fixed the boiler after 3 weeks, im sick of being ignored and freezing";
 
 interface Result {
   versions: { label: string; message: string }[];
+  locked?: string[]; // labels of the versions that unlock with an account
   subject: string;
   tip: string;
   safety: "none" | "crisis";
@@ -101,7 +103,7 @@ export default function TryIt() {
           <IconSparkle className="h-5 w-5" />
           {loading ? "Writing your message…" : result ? "Free try used" : "Say it nicelyy"}
         </button>
-        <p className="mt-2 text-center text-xs text-ink/45">Free, no sign-up. We don&apos;t keep what you write.</p>
+        <p className="mt-2 text-center text-xs text-ink/45">One free try a month, no sign-up. We don&apos;t keep what you write.</p>
         {error ? (
           <p role="alert" className="mt-4 flex items-start gap-2 rounded-xl bg-red-50 p-3.5 text-sm text-red-700">
             <IconInfo className="mt-0.5 h-4 w-4 flex-none" /> {error}
@@ -126,21 +128,46 @@ export default function TryIt() {
               selected={selected}
               onSelect={setSelected}
             />
+            {result.locked?.length ? (
+              <div className="card relative overflow-hidden p-5">
+                <p className="text-sm font-bold">
+                  {result.locked.length} more version{result.locked.length > 1 ? "s" : ""} ready for you
+                </p>
+                <div aria-hidden className="mt-3 space-y-3">
+                  {result.locked.map((label) => (
+                    <div key={label} className="rounded-2xl bg-ink/[.04] p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-ink/45">{label}</p>
+                      <div className="mt-2 space-y-2 blur-[3px]">
+                        <div className="h-2.5 w-11/12 rounded-full bg-ink/15" />
+                        <div className="h-2.5 w-4/5 rounded-full bg-ink/15" />
+                        <div className="h-2.5 w-2/3 rounded-full bg-ink/15" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute inset-x-0 bottom-0 flex flex-col items-center bg-gradient-to-t from-white via-white/95 to-transparent px-5 pb-5 pt-16 text-center">
+                  <Link href="/signup" onClick={() => track("try_unlock_click")} className="btn-primary">
+                    Sign up free to see all 3 <IconArrowRight />
+                  </Link>
+                  <p className="mt-2 text-xs text-ink/55">No card needed. Your first 3 messages are free.</p>
+                </div>
+              </div>
+            ) : null}
             <div className="rounded-2xl bg-night p-5 text-white">
               <p className="font-bold">Like it? There&apos;s more.</p>
               <p className="mt-1 text-sm text-white/70">
-                Create a free account for 3 more messages, plus voice notes, replies to messages, emails and
-                one-tap tweaks.
+                Create a free account for 3 free messages with all 3 versions each time, plus voice notes, replies to
+                messages, emails and one-tap tweaks.
               </p>
               <Link href="/signup" onClick={() => track("try_signup_click")} className="btn-primary mt-4">
-                Get 3 more free <IconArrowRight />
+                Get 3 messages free <IconArrowRight />
               </Link>
             </div>
           </div>
         ) : (
           <div className="rounded-3xl border-2 border-dashed border-ink/10 bg-white/50 p-8 text-center">
             <p className="font-bold">Your message will appear here</p>
-            <p className="mx-auto mt-1 max-w-xs text-sm text-ink/55">Three versions to pick from, ready to copy and send.</p>
+            <p className="mx-auto mt-1 max-w-xs text-sm text-ink/55">Ready to copy and send.</p>
           </div>
         )}
       </div>

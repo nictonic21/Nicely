@@ -26,7 +26,10 @@ export async function mockApi(page: Page, opts: { used?: number; limit?: number 
   });
   await page.route("**/api/try", (r) => {
     calls.try.push(r.request().postDataJSON());
-    return r.fulfill({ json: { versions, subject: "", tip: "Clear.", safety: "none" } });
+    return r.fulfill({
+      json: { versions: [versions[0]], locked: [versions[1].label, versions[2].label], subject: "", tip: "Clear.", safety: "none" },
+      headers: { "set-cookie": "nicelyy_tried=1; Path=/; Max-Age=2592000; HttpOnly; SameSite=Lax" },
+    });
   });
   return calls;
 }

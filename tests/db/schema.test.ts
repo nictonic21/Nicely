@@ -57,8 +57,8 @@ describe.skipIf(!url)("database schema", () => {
     expect(await tweak("h1", 2)).toBe("month_cap");
   });
 
-  it("gives one free try per visitor and respects the daily cap", async () => {
-    const t = (ip: string) => one("select public.claim_trial($1, 1, 2) as r", [ip]).then((x) => x.r);
+  it("limits free tries per address per month and respects the daily cap", async () => {
+    const t = (ip: string) => one("select public.claim_trial($1, 1, 2592000, 2) as r", [ip]).then((x) => x.r);
     expect((await t("ip1")).ok).toBe(true);
     expect(await t("ip1")).toMatchObject({ ok: false, reason: "used" });
     expect((await t("ip2")).ok).toBe(true);
@@ -88,7 +88,7 @@ describe.skipIf(!url)("database schema", () => {
     for (const role of ["anon", "authenticated"]) {
       await db.query(`set role ${role}`);
       for (const sql of [
-        "select public.claim_trial('x', 1, 1)",
+        "select public.claim_trial('x', 1, 60, 1)",
         "select public.admin_stats()",
         `select public.claim_rewrite('${U}', now(), 1, 1, 'kind', 'work', 'h')`,
       ]) {

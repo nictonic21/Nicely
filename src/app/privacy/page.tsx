@@ -39,8 +39,8 @@ export default function Privacy() {
           into your words.
         </li>
         <li>
-          If you use the free try without an account: a scrambled one-way version of your IP address, kept for 7
-          days, so each visitor gets one free try a day.
+          If you use the free try without an account: a scrambled one-way version of your IP address, kept for 31
+          days, and a small cookie in your browser, so each person gets one free try a month.
         </li>
         <li>
           If you rate a rewrite: the thumbs up or down, and a reason you pick from a list (like &ldquo;Too
@@ -95,8 +95,8 @@ export default function Privacy() {
 
       <h2>Cookies</h2>
       <p>
-        We only use the cookies needed to keep you logged in, plus one from Cloudflare that checks free-try
-        visitors aren&apos;t bots. No advertising or tracking cookies. Our visit counts don&apos;t use cookies.
+        We only use the cookies needed to keep you logged in, one that remembers you&apos;ve had your monthly free
+        try, and one from Cloudflare that checks free-try visitors aren&apos;t bots. No advertising or tracking cookies. Our visit counts don&apos;t use cookies.
       </p>
     </Legal>
   );

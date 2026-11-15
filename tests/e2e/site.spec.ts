@@ -11,6 +11,9 @@ test("home page shows the slogan, free try and pricing", async ({ page }) => {
   await page.locator("#try").getByRole("button", { name: /Say it nicelyy/ }).click();
   await expect(page.getByText("Like it? There's more.")).toBeVisible();
   await expect(page.locator("#try").getByText(versions[0].message)).toBeVisible();
+  // Versions 2 and 3 stay locked: named, but their words are never shown.
+  await expect(page.getByRole("link", { name: /Sign up free to see all 3/ })).toBeVisible();
+  await expect(page.locator("#try").getByText(versions[1].message)).toHaveCount(0);
   expect(calls.try).toHaveLength(1);
 });
 

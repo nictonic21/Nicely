@@ -204,10 +204,12 @@ create index if not exists trial_uses_created_idx on public.trial_uses (created_
 alter table public.trial_uses enable row level security;
 -- No policies: only the server reads and writes this table.
 
+drop function if exists public.claim_trial(text, integer, integer);
 create or replace function public.claim_trial(
   p_ip_hash text,
-  p_per_ip integer,
-  p_daily_cap integer
+  p_per_ip integer,          -- free tries allowed per internet address...
+  p_window_seconds integer,  -- ...in this window (e.g. 30 days)
+  p_daily_cap integer        -- free tries per day across everyone
 )
 returns jsonb
 language plpgsql
@@ -220,10 +222,10 @@ declare
 begin
   -- One at a time, so the daily cap can't be overshot.
   perform pg_advisory_xact_lock(4242);
-  -- Keep only a week of these, for privacy.
-  delete from public.trial_uses where created_at < now() - interval '7 days';
+  -- Keep only what the monthly limit needs (31 days), for privacy.
+  delete from public.trial_uses where created_at < now() - interval '31 days';
   select count(*) into v_ip from public.trial_uses
-    where ip_hash = p_ip_hash and created_at > now() - interval '24 hours';
+    where ip_hash = p_ip_hash and created_at > now() - make_interval(secs => p_window_seconds);
   if v_ip >= p_per_ip then
     return jsonb_build_object('ok', false, 'reason', 'used');
   end if;
@@ -237,8 +239,8 @@ begin
 end;
 $$;
 
-revoke all on function public.claim_trial(text, integer, integer) from public, anon, authenticated;
-grant execute on function public.claim_trial(text, integer, integer) to service_role;
+revoke all on function public.claim_trial(text, integer, integer, integer) from public, anon, authenticated;
+grant execute on function public.claim_trial(text, integer, integer, integer) to service_role;
 
 -- 7. General rate limiter (contact form and similar) ---------------------------
 -- Counts recent hits for a key (e.g. a hashed IP) and refuses once the limit

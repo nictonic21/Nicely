@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import ShareMenu from "@/components/ShareMenu";
-import { IconBulb, IconCheck, IconCopy, IconPlus, IconRefresh, IconWand } from "@/components/Icons";
+import { IconBulb, IconCheck, IconCopy, IconPlus, IconRefresh, IconShare } from "@/components/Icons";
 import { track } from "@/lib/analytics";
+
+// The finished message, in one card: pick a version, copy or send it,
+// adjust it with a quick tweak. Kept deliberately calm and uncluttered.
 
 export interface Version {
   label: string;
@@ -44,6 +47,7 @@ export default function ResultPanel({
   onCopied,
   tweaks,
   actions,
+  footer,
   share = true,
 }: {
   versions: Version[];
@@ -56,9 +60,11 @@ export default function ResultPanel({
   onCopied?: () => void;
   tweaks?: { left: number; busy: TweakId | null; onTweak: (id: TweakId) => void; note?: string | null };
   actions?: { onRetry: () => void; onNew: () => void; busy: boolean };
+  footer?: React.ReactNode;
   share?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const [sending, setSending] = useState(false);
   const current = versions[Math.min(selected, versions.length - 1)];
 
   async function copy() {
@@ -70,7 +76,7 @@ export default function ResultPanel({
   }
 
   return (
-    <div className="space-y-4" aria-live="polite">
+    <div className="space-y-3" aria-live="polite">
       {safety === "crisis" ? (
         <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
           <p className="font-semibold">You don&apos;t have to deal with this on your own.</p>
@@ -84,43 +90,40 @@ export default function ResultPanel({
 
       <div className="gradient-card">
         <div className="gradient-card-inner overflow-hidden">
-          <div className="flex items-center justify-between gap-3 border-b border-ink/[.06] px-5 py-3.5 sm:px-6">
-            <span className="inline-flex items-center gap-2 text-sm font-bold">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white">
-                <IconCheck className="h-3 w-3" />
+          <div className="flex flex-wrap items-center justify-between gap-2 px-5 pt-4 sm:px-6">
+            {versions.length > 1 ? (
+              <div role="tablist" aria-label="Versions" className="flex flex-wrap gap-1.5">
+                {versions.map((v, i) => {
+                  const on = i === selected;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      role="tab"
+                      aria-selected={on}
+                      aria-label={`Option ${i + 1}: ${v.label}`}
+                      onClick={() => onSelect(i)}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold transition focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 ${
+                        on ? "bg-ink text-white" : "bg-ink/[.05] text-ink/60 hover:text-ink"
+                      }`}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+                <IconCheck className="h-3.5 w-3.5" /> Ready to send
               </span>
-              Ready to send
-            </span>
-            <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-bold text-accent-dark">{toneLabel}</span>
+            )}
+            <span className="text-xs font-semibold text-ink/45">{toneLabel}</span>
           </div>
 
-          {versions.length > 1 ? (
-            <div role="tablist" aria-label="Versions" className="flex gap-1.5 overflow-x-auto px-5 pt-4 sm:px-6">
-              {versions.map((v, i) => {
-                const on = i === selected;
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    role="tab"
-                    aria-selected={on}
-                    onClick={() => onSelect(i)}
-                    className={`flex-none rounded-xl px-3 py-1.5 text-left transition focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 ${
-                      on ? "bg-ink text-white" : "bg-ink/[.05] text-ink/65 hover:bg-ink/[.08] hover:text-ink"
-                    }`}
-                  >
-                    <span className="block text-[10px] font-bold uppercase tracking-wider opacity-60">Option {i + 1}</span>
-                    <span className="block whitespace-nowrap text-xs font-semibold">{v.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
-
-          <div className="px-5 py-5 sm:px-6">
+          <div className="px-5 py-4 sm:px-6">
             {subject ? (
-              <p className="mb-4 rounded-xl bg-ink/[.03] px-3 py-2 text-sm">
-                <span className="font-semibold text-ink/50">Subject </span>
+              <p className="mb-3 text-sm">
+                <span className="font-semibold text-ink/45">Subject: </span>
                 {subject}
               </p>
             ) : null}
@@ -129,70 +132,77 @@ export default function ResultPanel({
             </p>
           </div>
 
-          <div className="space-y-3 border-t border-ink/[.06] bg-ink/[.02] px-5 py-4 sm:px-6">
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={copy} className="btn-primary px-5 py-2.5 text-sm">
-                {copied ? <IconCheck /> : <IconCopy />}
-                {copied ? "Copied" : "Copy message"}
+          <div className="flex flex-wrap items-center gap-2 px-5 pb-4 sm:px-6">
+            <button type="button" onClick={copy} className="btn-primary px-5 py-2.5 text-sm">
+              {copied ? <IconCheck /> : <IconCopy />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+            {share ? (
+              <button
+                type="button"
+                aria-expanded={sending}
+                onClick={() => setSending((v) => !v)}
+                className="btn-secondary px-4 py-2 text-sm"
+              >
+                <IconShare /> Send
               </button>
-              {actions ? (
-                <>
-                  <button type="button" onClick={actions.onRetry} disabled={actions.busy} className="btn-secondary px-4 py-2 text-sm">
-                    <IconRefresh /> Try again
-                  </button>
-                  <button
-                    type="button"
-                    onClick={actions.onNew}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold text-ink/60 transition hover:bg-ink/5 hover:text-ink"
-                  >
-                    <IconPlus /> New
-                  </button>
-                </>
-              ) : null}
-            </div>
-            {share ? <ShareMenu message={current.message} subject={subject} /> : null}
+            ) : null}
+            {actions ? (
+              <>
+                <button type="button" onClick={actions.onRetry} disabled={actions.busy} className="btn-secondary px-4 py-2 text-sm">
+                  <IconRefresh /> Try again
+                </button>
+                <button
+                  type="button"
+                  onClick={actions.onNew}
+                  className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-2 text-sm font-semibold text-ink/55 transition hover:bg-ink/5 hover:text-ink"
+                >
+                  <IconPlus /> New
+                </button>
+              </>
+            ) : null}
           </div>
+          {share && sending ? (
+            <div className="px-5 pb-4 sm:px-6">
+              <ShareMenu message={current.message} subject={subject} />
+            </div>
+          ) : null}
+
+          {tweaks ? (
+            <div className="border-t border-ink/[.06] px-5 py-3.5 sm:px-6">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {TWEAK_BUTTONS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    disabled={!!tweaks.busy || tweaks.left <= 0}
+                    onClick={() => tweaks.onTweak(t.id)}
+                    className="rounded-full border border-ink/10 bg-white px-3 py-1 text-xs font-semibold text-ink/70 transition hover:border-accent/40 hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    {tweaks.busy === t.id ? "Working…" : t.label}
+                  </button>
+                ))}
+                <span className="ml-auto text-xs text-ink/45">
+                  {tweaks.left > 0 ? `${tweaks.left} free left` : "Free tweaks used"}
+                </span>
+              </div>
+              {tweaks.note ? <p className="mt-2 text-xs text-ink/60">{tweaks.note}</p> : null}
+            </div>
+          ) : null}
+
+          {tip || footer ? (
+            <div className="space-y-2.5 border-t border-ink/[.06] bg-ink/[.02] px-5 py-3.5 sm:px-6">
+              {tip ? (
+                <p className="flex items-start gap-2 text-sm text-ink/65">
+                  <IconBulb className="mt-0.5 h-4 w-4 flex-none text-accent" />
+                  <span>{tip}</span>
+                </p>
+              ) : null}
+              {footer}
+            </div>
+          ) : null}
         </div>
       </div>
-
-      {tweaks ? (
-        <div className="card p-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className="flex items-center gap-2 text-sm font-bold">
-              <IconWand className="h-4 w-4 text-accent" /> Quick tweaks
-            </p>
-            <span className="text-xs text-ink/50">
-              {tweaks.left > 0 ? `${tweaks.left} free left` : "Free tweaks used"}
-            </span>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {TWEAK_BUTTONS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                disabled={!!tweaks.busy || tweaks.left <= 0}
-                onClick={() => tweaks.onTweak(t.id)}
-                className="rounded-full border border-ink/10 bg-white px-3.5 py-1.5 text-sm font-semibold text-ink/75 transition hover:-translate-y-0.5 hover:border-accent/40 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-              >
-                {tweaks.busy === t.id ? "Working…" : t.label}
-              </button>
-            ))}
-          </div>
-          {tweaks.note ? <p className="mt-3 text-xs text-ink/60">{tweaks.note}</p> : null}
-        </div>
-      ) : null}
-
-      {tip ? (
-        <div className="flex items-start gap-3 rounded-2xl bg-brand-soft p-4 text-sm ring-1 ring-accent/10">
-          <span className="flex h-7 w-7 flex-none items-center justify-center rounded-lg bg-white text-accent shadow-soft">
-            <IconBulb />
-          </span>
-          <p className="text-ink/75">
-            <span className="font-semibold text-ink">Why it works. </span>
-            {tip}
-          </p>
-        </div>
-      ) : null}
     </div>
   );
 }

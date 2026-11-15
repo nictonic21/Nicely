@@ -24,7 +24,7 @@ test("app: write, pick a version, tweak, rate, and find it in history", async ({
   await page.getByRole("button", { name: /Kind/ }).click();
   await page.getByRole("button", { name: "Say it nicelyy" }).click();
 
-  await expect(page.getByText("Ready to send", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy", exact: true })).toBeVisible();
   expect(calls.rewrite[0]).toMatchObject({ tone: "kind", recipient: "work", format: "text" });
 
   await page.getByRole("tab", { name: /Option 2/ }).click();
@@ -39,6 +39,7 @@ test("app: write, pick a version, tweak, rate, and find it in history", async ({
   await page.getByRole("button", { name: "Too long" }).click();
   await expect.poll(() => calls.feedback.at(-1)).toMatchObject({ rating: -1, reason: "too_long" });
 
+  await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByRole("link", { name: "WhatsApp" })).toHaveAttribute("href", /wa\.me/);
 
   await page.goto("/app/history");

@@ -33,14 +33,14 @@ export default function RateRewrite({ rewriteId }: { rewriteId: string }) {
   }
 
   const thumb = (on: boolean) =>
-    `inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${
+    `inline-flex h-7 w-7 items-center justify-center rounded-full border transition ${
       on ? "border-accent bg-accent text-white" : "border-ink/10 bg-white text-ink/55 hover:border-accent/40 hover:text-ink"
     }`;
 
   return (
-    <div className="card px-4 py-3">
+    <div>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink/75">
+        <p className="text-xs font-semibold text-ink/55">
           {rating === 1 ? "Glad it helped. Thanks!" : rating === -1 && reason ? "Thanks, that helps us improve." : "Was this helpful?"}
         </p>
         <div className="flex gap-2">
@@ -54,7 +54,7 @@ export default function RateRewrite({ rewriteId }: { rewriteId: string }) {
       </div>
       {rating === -1 ? (
         <div className="mt-3">
-          <p className="text-xs text-ink/55">What was wrong? (Tip: a quick tweak or a different tone might fix it.)</p>
+          <p className="text-xs text-ink/55">What was wrong? A quick tweak or a different tone might fix it.</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {FEEDBACK_REASONS.map((r) => (
               <button

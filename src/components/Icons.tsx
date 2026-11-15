@@ -154,3 +154,8 @@ export const IconThumbDown = ({ className = "h-4 w-4" }: P) => (
     <path d="M17 13V4h2.5A1.5 1.5 0 0 1 21 5.5v6a1.5 1.5 0 0 1-1.5 1.5H17Zm0 0-3.6 7.2a1.9 1.9 0 0 1-3.6-1V15H5.2a2 2 0 0 1-2-2.3l1.2-7A2 2 0 0 1 6.4 4H17" />
   </svg>
 );
+export const IconChevronDown = ({ className = "h-4 w-4" }: P) => (
+  <svg {...base} className={className}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);

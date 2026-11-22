@@ -9,6 +9,7 @@ Helps people say difficult things well: they type, paste or voice-note what they
 - Logo: designed in-house at the owner's request (speech bubble + sparkle mark, "nicelyy" wordmark with gradient final "y"). Source: `src/components/Logo.tsx` and `public/brand/`. Don't redraw or alter it without the owner asking.
 
 ## Key facts
+- Live site: https://www.nicelyy.co.uk (main; nicelyy.co.uk redirects to it). Domain bought at Namecheap, DNS: A @ → Vercel, CNAME www → Vercel. Hosted on Vercel project "nicelyy" (deploys from `main`). Supabase project ref `bfxtucuwzbzbgwzxtnjy`. Stripe test mode uses the "Nicelyy sandbox" account; live will use the real "Nicelyy" account.
 - Plans and limits: `src/lib/plans.ts` (the single source of truth). Free 3 total; Starter £7/10; Plus £15/30; Unlimited £20 (fair use 500/month). Yearly = 10x monthly, allowance still tops up monthly (`allowanceStart`). Each message returns 3 versions and includes 3 free tweaks (max 200 tweaks/month).
 - Free try on the home page: `/api/try`, one per hashed IP per day, global daily cap, optional Turnstile.
 - On-device only (never server): history, remembered choices (`src/lib/device.ts`).

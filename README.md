@@ -45,24 +45,15 @@ Do the steps in order. Keep a note open: you'll copy several keys into it, and p
 
 ### Step 3: Stripe (payments)
 
-1. Go to **stripe.com** and create a **new account** for Nicelyy. If you already have Stripe for Hatch, use the account menu at the top left → **New account**.
-2. Stay in **Test mode** (toggle at the top) until you've tested everything.
-3. Go to **Product catalogue → Add product** and create three products, each with a **Recurring, Monthly** price in **GBP**:
-   - `Nicelyy Starter`: £7.00
-   - `Nicelyy Plus`: £15.00
-   - `Nicelyy Unlimited`: £20.00
-4. Open each product, click its price, and copy the **Price ID** (it starts with `price_`) into your note:
-   - `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PLUS`, `STRIPE_PRICE_UNLIMITED`
-5. **Yearly plans (recommended):** open each product again, click **Add another price**, and add a **Recurring, Yearly** price in GBP. These are 12 months for the price of 10:
-   - Starter: £70.00 · Plus: £150.00 · Unlimited: £200.00
-   - Copy each yearly Price ID into your note as `STRIPE_PRICE_STARTER_YEARLY`, `STRIPE_PRICE_PLUS_YEARLY` and `STRIPE_PRICE_UNLIMITED_YEARLY`.
-   - The Monthly/Yearly switch appears on the site once all three are added.
-6. Go to **Developers → API keys**. Copy the **Secret key** → `STRIPE_SECRET_KEY`.
-7. Go to **Settings → Billing → Customer portal**:
-   - Turn on **Customers can update subscriptions**, and add all three Nicelyy products (with both their monthly and yearly prices), so people can switch plans.
-   - Turn on **Cancel subscriptions**.
-   - Click **Save**.
-8. You'll set up the webhook in Step 6, once the site has an address.
+1. Create a **new Stripe account** for Nicelyy (separate from Hatch). Stay in **Test mode** (or the sandbox) until everything is tested.
+2. The plans, prices, billing page and webhook are created **automatically** by `scripts/stripe-setup.mjs`. Ask Claude to run it: give your **test secret key** (`sk_test_`) through the secure key form, never in chat. It's safe to run again; it never makes duplicates.
+   - Creates Starter £7/£70, Plus £15/£150, Unlimited £20/£200 (monthly and yearly, VAT included).
+   - Sets up the billing page: change plan, update card, invoices, cancel at the end of the period, with a "why are you leaving?" question.
+   - Creates the webhook at `https://YOUR-SITE/api/stripe/webhook`.
+   - Prints the `STRIPE_PRICE_...` and `STRIPE_PORTAL_CONFIGURATION` lines to paste into Vercel.
+3. In Stripe: **Developers → Webhooks →** the Nicelyy endpoint **→ Signing secret → Reveal**. That's `STRIPE_WEBHOOK_SECRET`.
+4. **Developers → API keys → Secret key** is `STRIPE_SECRET_KEY`.
+5. Recommended settings (no code): **Settings → Billing → Subscriptions and emails**: turn on Smart Retries, and emails for failed payments and expiring cards.
 
 ### Step 4: Vercel (hosting)
 
@@ -80,6 +71,8 @@ Do the steps in order. Keep a note open: you'll copy several keys into it, and p
 6. Click **Deploy**.
 
 ### Step 6: Connect Stripe to the site (webhook)
+
+The setup script in Step 3 already creates the webhook. If you made the plans by hand instead, do this:
 
 1. In Stripe, go to **Developers → Webhooks → Add endpoint**.
 2. Endpoint URL: `https://YOUR-SITE/api/stripe/webhook`
@@ -117,7 +110,7 @@ Do the steps in order. Keep a note open: you'll copy several keys into it, and p
 
 ### Step 9: Go live
 
-1. In Stripe, switch to **Live mode**. Create the three products again (with their yearly prices), and set up the webhook and customer portal again. Live mode has its own settings.
+1. In Stripe, switch to **Live mode** and run `scripts/stripe-setup.mjs` again with your **live** key and real site address. It creates the same plans, billing page and webhook in live mode.
 2. In Vercel, replace the Stripe keys, the three price IDs and the webhook secret with the **live** ones, then redeploy.
 3. Buy a domain and add it under Vercel **Settings → Domains**. Then update `NEXT_PUBLIC_BASE_URL`, the Supabase Site URL, and the Stripe webhook address.
 

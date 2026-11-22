@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRequestUser, getUserRow } from "@/lib/auth";
 import { isPaidTier } from "@/lib/plans";
-import { getStripe, isLive, priceIdFor, yearlyAvailable } from "@/lib/stripe";
+import { getStripe, isLive, priceIdFor, yearlyAvailable, portalOptions } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // POST /api/billing/subscribe  Body: { tier: "starter" | "plus" | "unlimited", interval?: "month" | "year" }
@@ -65,6 +65,7 @@ export async function POST(request: Request) {
     const subs = await stripe.subscriptions.list({ customer: customerId, limit: 10 });
     if (subs.data.some(isLive)) {
       const portal = await stripe.billingPortal.sessions.create({
+        ...portalOptions(),
         customer: customerId,
         return_url: `${origin}/account`,
       });

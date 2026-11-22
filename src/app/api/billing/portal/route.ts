@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRequestUser, getUserRow } from "@/lib/auth";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, portalOptions } from "@/lib/stripe";
 
 // POST /api/billing/portal: Stripe's page to change plan, update card,
 // see invoices or cancel.
@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     }
     const origin = process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin;
     const session = await getStripe().billingPortal.sessions.create({
+        ...portalOptions(),
       customer: row.stripe_customer_id,
       return_url: `${origin}/account`,
     });

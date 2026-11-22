@@ -87,3 +87,11 @@ export async function getRevenue(): Promise<{ mrrPence: number; subscriptions: n
   }
   return { mrrPence: Math.round(mrr), subscriptions, yearly };
 }
+
+// The billing page settings made by scripts/stripe-setup.mjs (change plan,
+// update card, invoices, cancel). Falls back to the account's default
+// settings if not set.
+export function portalOptions(): { configuration?: string } {
+  const id = process.env.STRIPE_PORTAL_CONFIGURATION;
+  return id ? { configuration: id } : {};
+}

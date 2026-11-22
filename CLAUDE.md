@@ -17,6 +17,8 @@ Helps people say difficult things well: they type, paste or voice-note what they
 - Usage is claimed atomically by the `claim_rewrite` Postgres function (`supabase/schema.sql`), and refunded if the AI step fails.
 - Message content is never stored (a privacy promise in `/privacy`). Don't add logging of user text.
 - Plans change only through the Stripe webhook (`src/app/api/stripe/webhook`).
+- Stripe setup is code: `scripts/stripe-setup.mjs` (idempotent, lookup keys `nicelyy_<tier>_<monthly|yearly>`, VAT-inclusive GBP prices, portal config tagged `metadata.nicelyy=portal`, webhook). Run once per mode (test, then live). Never print the webhook signing secret. Nicelyy uses Stripe Billing only; Connect isn't needed.
+- In cloud sessions the Stripe key is injected by the session proxy for api.stripe.com: run the CLI/script with a placeholder key (`sk_test_proxyinjected`), and for Node add `NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt`.
 - Owner dashboard `/admin` (emails in `ADMIN_EMAILS`), numbers from `admin_stats()` + Stripe `getRevenue()`.
 - Help page `/help` with contact form (`/api/contact`, Resend, rate-limited by `hit_rate_limit`).
 - Thumbs up/down stored as `rating` + fixed `rating_reason` on `rewrites`, never text.

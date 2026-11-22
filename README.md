@@ -154,6 +154,7 @@ This needs a paid Apple Developer account (£79/year). Follow Supabase's guide u
 1. In Vercel, add `ADMIN_EMAILS` with the email you log in with, then redeploy.
 2. Log in and go to `https://YOUR-SITE/admin`. You'll see monthly revenue, paying customers by plan, sign-ups, messages per day, free-try conversion, and which tones people like.
 3. Everyone else sees "page not found" there.
+4. Tap **Setup check** on the dashboard (or go to `/admin/setup`) to test every connection: database, AI, Stripe (which account, whether each price exists and matches), webhook, emails. It explains any problem in plain English and never shows a key.
 
 ---
 

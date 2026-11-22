@@ -136,7 +136,10 @@ export default async function AdminPage() {
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <p className="text-xs font-bold uppercase tracking-[0.14em] text-accent">Owner only</p>
       <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Dashboard</h1>
-      <p className="mt-1 text-sm text-ink/55">Live numbers. Counts only, never anyone&apos;s messages.</p>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-ink/55">Live numbers. Counts only, never anyone&apos;s messages.</p>
+        <a href="/admin/setup" className="btn-secondary px-4 py-2 text-sm">Setup check</a>
+      </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Tile

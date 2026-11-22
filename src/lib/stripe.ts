@@ -6,7 +6,9 @@ let stripe: Stripe | null = null;
 export function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY is not set.");
-  if (!stripe) stripe = new Stripe(key);
+  // The fetch-based client works the same on Vercel and in restricted
+  // networks (it honours proxy settings), unlike Node's default client.
+  if (!stripe) stripe = new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
   return stripe;
 }
 

@@ -19,7 +19,7 @@ Helps people say difficult things well: they type, paste or voice-note what they
 - Plans change only through the Stripe webhook (`src/app/api/stripe/webhook`).
 - Stripe setup is code: `scripts/stripe-setup.mjs` (idempotent, lookup keys `nicelyy_<tier>_<monthly|yearly>`, VAT-inclusive GBP prices, portal config tagged `metadata.nicelyy=portal`, webhook). Run once per mode (test, then live). Never print the webhook signing secret. Nicelyy uses Stripe Billing only; Connect isn't needed.
 - In cloud sessions the Stripe key is injected by the session proxy for api.stripe.com: run the CLI/script with a placeholder key (`sk_test_proxyinjected`), and for Node add `NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt`.
-- Owner dashboard `/admin` (emails in `ADMIN_EMAILS`), numbers from `admin_stats()` + Stripe `getRevenue()`.
+- Owner dashboard `/admin` (emails in `ADMIN_EMAILS`), numbers from `admin_stats()` + Stripe `getRevenue()`. Setup check at `/admin/setup` (`src/lib/health.ts`): tests every integration, never returns secret values. Point the owner there first when something isn't working.
 - Help page `/help` with contact form (`/api/contact`, Resend, rate-limited by `hit_rate_limit`).
 - Thumbs up/down stored as `rating` + fixed `rating_reason` on `rewrites`, never text.
 - Tests: `npm test` (unit + DB, DB needs `DATABASE_URL`), `npm run test:e2e` (Playwright, mocked APIs). CI in `.github/workflows/ci.yml`. Keep them green; add tests with new features.

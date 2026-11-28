@@ -143,6 +143,13 @@ export default function PricingCards({
         Prices include VAT where it applies. *Unlimited is subject to a fair-use limit of{" "}
         {PLANS.unlimited.limit} messages a month. Start with {PLANS.free.limit} free messages, no card needed.
       </p>
+      {mode === "account" ? (
+        <p className="mx-auto mt-2 max-w-xl text-center text-xs text-ink/50">
+          Plans renew automatically until you cancel, which you can do any time here. By subscribing you ask us to
+          start straight away; you can still cancel within 14 days for a refund, minus a fair amount for messages
+          already used. See the <a href="/terms" className="underline">Terms</a>.
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -45,15 +45,18 @@ export default function Terms() {
           month as the monthly plan.
         </li>
         ) : null}
-        <li>The free try on the home page is limited to one per person per day.</li>
+        <li>The free try on the home page is limited to one per person per month.</li>
         <li>Unused messages don't roll over to the next month.</li>
         <li>
-          Plans renew monthly until you cancel. Payments are handled by Stripe. You can cancel any time
-          from your account page, and keep your plan until the end of the month you've paid for.
+          Plans renew automatically (monthly, or yearly if you chose yearly) until you cancel. Payments are
+          handled by Stripe. You can cancel any time from your account page in a couple of taps, and keep
+          your plan until the end of the period you&apos;ve paid for. You won&apos;t be charged again after
+          cancelling.
         </li>
         <li>
-          If you change your mind, you can cancel within 14 days of first subscribing . If you
-          haven&apos;t used any paid messages, contact us and we&apos;ll refund you in full.
+          When you subscribe, you ask us to start your plan straight away. You still have 14 days from
+          first subscribing to change your mind: contact us and we&apos;ll refund you, minus a fair amount
+          for any paid messages you&apos;ve already used. If you haven&apos;t used any, you get a full refund.
         </li>
       </ul>
 

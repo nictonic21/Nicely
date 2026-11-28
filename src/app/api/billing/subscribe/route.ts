@@ -91,6 +91,14 @@ export async function POST(request: Request) {
       metadata: { userId: user.id },
       subscription_data: { metadata: { userId: user.id } },
       allow_promotion_codes: true,
+      // Shown above the Subscribe button: the UK cooling-off notice, so the
+      // customer knowingly asks for the plan to start straight away.
+      custom_text: {
+        submit: {
+          message:
+            "Your plan starts straight away and renews automatically until you cancel, which you can do any time from your Nicelyy account. You can still cancel within 14 days for a refund, minus a fair amount for messages already used.",
+        },
+      },
       success_url: `${origin}/app?welcome=1&plan=${body.tier}&interval=${interval}`,
       cancel_url: `${origin}/account`,
     });

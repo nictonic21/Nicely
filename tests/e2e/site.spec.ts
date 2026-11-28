@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { mockApi, versions } from "./fixtures";
 
+// These tests are about the app, not the cookie banner: answer it up front.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem("nicelyy:ad-consent:v1", "denied"));
+});
+
 test("home page shows the slogan, free try and pricing", async ({ page }) => {
   const calls = await mockApi(page);
   await page.goto("/");

@@ -218,6 +218,7 @@ export async function runHealthChecks(): Promise<CheckGroup[]> {
         setting("Human check (Turnstile)", "TURNSTILE_SECRET_KEY", "Off: the free try relies on its other limits only.", false),
         setting("Error alerts (Sentry)", "NEXT_PUBLIC_SENTRY_DSN", "Off: you won't be told when something breaks.", false),
         setting("Google / Apple sign-in", "NEXT_PUBLIC_AUTH_PROVIDERS", "Off: email sign-up only.", false),
+        setting("Meta Pixel (ads)", "NEXT_PUBLIC_META_PIXEL_ID", "Off: no cookie banner, and Facebook/Instagram ads can't be measured.", false),
       ],
     },
   ];

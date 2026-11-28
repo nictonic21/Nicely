@@ -3,6 +3,8 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { Analytics } from "@vercel/analytics/react";
+import MetaPixel from "@/components/MetaPixel";
+import CookieBanner from "@/components/CookieBanner";
 
 const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -39,6 +41,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex-1">{children}</div>
         <Footer />
         <Analytics />
+        <MetaPixel />
+        <CookieBanner />
       </body>
     </html>
   );

@@ -5,7 +5,7 @@ import Link from "next/link";
 import ResultPanel from "@/components/ResultPanel";
 import { IconArrowRight, IconInfo, IconSparkle } from "@/components/Icons";
 import { TONES, type ToneId } from "@/lib/options";
-import { track } from "@/lib/analytics";
+import { metaTrack, track } from "@/lib/analytics";
 import Turnstile, { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/Turnstile";
 
 // The free try on the home page. No account needed. A taster: version 1 in
@@ -52,6 +52,7 @@ export default function TryIt() {
       setResult(data);
       setSelected(0);
       track("try_success", { tone });
+      metaTrack("Lead", { content_name: "Free try" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {

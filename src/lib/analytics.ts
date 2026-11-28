@@ -11,3 +11,17 @@ export function track(event: string, props?: Props) {
     vercelTrack(event, props);
   } catch {}
 }
+
+// Meta (Facebook / Instagram) ad events. Only sent if the visitor accepted
+// advertising cookies, because the pixel only exists after consent. Never
+// pass anything people wrote: just the event name and, for money events, the
+// plan's price.
+type Fbq = (...args: unknown[]) => void;
+export function metaTrack(event: string, params?: Record<string, string | number>, eventId?: string) {
+  try {
+    const fbq = (window as unknown as { fbq?: Fbq }).fbq;
+    if (!fbq) return;
+    if (eventId) fbq("track", event, params ?? {}, { eventID: eventId });
+    else fbq("track", event, params ?? {});
+  } catch {}
+}

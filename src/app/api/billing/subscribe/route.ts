@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       metadata: { userId: user.id },
       subscription_data: { metadata: { userId: user.id } },
       allow_promotion_codes: true,
-      success_url: `${origin}/app?welcome=1`,
+      success_url: `${origin}/app?welcome=1&plan=${body.tier}&interval=${interval}`,
       cancel_url: `${origin}/account`,
     });
     return NextResponse.json({ url: session.url });

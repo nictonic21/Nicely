@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy" };
 
 export default function Privacy() {
   return (
-    <Legal title="Privacy policy" updated="7 November 2026">
+    <Legal title="Privacy policy" updated="28 November 2026">
       <p>
         {LEGAL_NAME} runs Nicelyy and is responsible for your personal data under UK data protection
         law. In short: <strong>we don't keep what you write.</strong>
@@ -60,6 +60,10 @@ export default function Privacy() {
         <li>Supabase: accounts and database.</li>
         <li>Stripe: payments.</li>
         <li>Vercel: hosting, and anonymous visit counts with no cookies.</li>
+        <li>
+          Meta (Facebook and Instagram): only if you accept advertising cookies, to measure our ads. See Cookies
+          below.
+        </li>
         <li>Resend: sends our emails.</li>
         <li>Cloudflare Turnstile: checks free-try visitors are human, not bots.</li>
         <li>Sentry: tells us when something breaks. Error reports never include what you write.</li>
@@ -93,10 +97,22 @@ export default function Privacy() {
         {CONTACT_EMAIL ? <> To contact us, email <a className="underline" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</> : null}
       </p>
 
-      <h2>Cookies</h2>
+      <h2 id="cookies">Cookies</h2>
       <p>
-        We only use the cookies needed to keep you logged in, one that remembers you&apos;ve had your monthly free
-        try, and one from Cloudflare that checks free-try visitors aren&apos;t bots. No advertising or tracking cookies. Our visit counts don&apos;t use cookies.
+        <strong>Always on (needed for the site to work):</strong> cookies that keep you logged in, one that remembers
+        you&apos;ve had your monthly free try, and one from Cloudflare that checks free-try visitors aren&apos;t bots.
+        Our own visit counts don&apos;t use cookies.
+      </p>
+      <p>
+        <strong>Advertising (only if you accept):</strong> the Meta Pixel, which tells Meta (Facebook and Instagram)
+        when someone who saw our ads visits, signs up, starts a checkout or subscribes, so we can measure and improve
+        our ads. It only sends those events and the plan price. It never sees what you write, and we&apos;ve switched
+        off its automatic data collection. Meta may use this with information it already has about you, under{" "}
+        <a className="underline" href="https://www.facebook.com/privacy/policy/">Meta&apos;s Privacy Policy</a>.
+      </p>
+      <p>
+        Nothing is loaded until you choose, and you can change your mind any time with &ldquo;Cookie settings&rdquo; at
+        the bottom of every page.
       </p>
     </Legal>
   );

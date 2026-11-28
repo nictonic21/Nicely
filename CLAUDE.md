@@ -22,6 +22,7 @@ Helps people say difficult things well: they type, paste or voice-note what they
 - In cloud sessions the Stripe key is injected by the session proxy for api.stripe.com: run the CLI/script with a placeholder key (`sk_test_proxyinjected`), and for Node add `NODE_USE_ENV_PROXY=1 NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt`.
 - Owner dashboard `/admin` (emails in `ADMIN_EMAILS`), numbers from `admin_stats()` + Stripe `getRevenue()`. Setup check at `/admin/setup` (`src/lib/health.ts`): tests every integration, never returns secret values. Point the owner there first when something isn't working.
 - Help page `/help` with contact form (`/api/contact`, Resend, rate-limited by `hit_rate_limit`).
+- Meta Pixel: `NEXT_PUBLIC_META_PIXEL_ID`; loads only after cookie consent (`src/lib/consent.ts`, `CookieBanner`, `MetaPixel` with autoConfig off). Events via `metaTrack()` in `src/lib/analytics.ts`: Lead, CompleteRegistration, InitiateCheckout, Subscribe (`PurchaseTracker` reads `?plan=&interval=` from Stripe's success URL). Never send user text to Meta. Consent tests in `tests/e2e/consent.spec.ts` (CI builds with a dummy pixel ID).
 - Thumbs up/down stored as `rating` + fixed `rating_reason` on `rewrites`, never text.
 - Tests: `npm test` (unit + DB, DB needs `DATABASE_URL`), `npm run test:e2e` (Playwright, mocked APIs). CI in `.github/workflows/ci.yml`. Keep them green; add tests with new features.
 - The go-live steps are in README.md.

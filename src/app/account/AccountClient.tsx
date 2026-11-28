@@ -5,7 +5,8 @@ import Link from "next/link";
 import PricingCards from "@/components/PricingCards";
 import Glow from "@/components/Glow";
 import { createClient, withTimeout } from "@/lib/supabase/client";
-import { isPaidTier, type Tier } from "@/lib/plans";
+import { isPaidTier, PLANS, type Tier } from "@/lib/plans";
+import { metaTrack } from "@/lib/analytics";
 
 interface Me {
   email: string;
@@ -53,8 +54,14 @@ export default function AccountClient() {
     })
       .then((r) => r.json())
       .then((d) => {
-        if (d.url) window.location.href = d.url;
-        else throw new Error(d.error);
+        if (!d.url) throw new Error(d.error);
+        const interval = new URLSearchParams(window.location.search).get("interval") === "year" ? "year" : "month";
+        metaTrack("InitiateCheckout", {
+          value: interval === "year" ? PLANS[wanted].yearlyPounds : PLANS[wanted].pricePounds,
+          currency: "GBP",
+          content_name: PLANS[wanted].name,
+        });
+        window.location.href = d.url;
       })
       .catch((e) => {
         setError(e?.message || "Could not start checkout.");

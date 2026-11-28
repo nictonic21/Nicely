@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import AuthShell from "@/components/AuthShell";
 import OAuthButtons from "@/components/OAuthButtons";
-import { track } from "@/lib/analytics";
+import { metaTrack, track } from "@/lib/analytics";
 import { AUTH_NOT_READY, AUTH_READY, createClient, friendlyError, withTimeout } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -50,6 +50,7 @@ export default function SignupPage() {
       return;
     }
     track("signup");
+    metaTrack("CompleteRegistration", { content_name: "Nicelyy account" });
     if (data.session) {
       window.location.href = next;
     } else {

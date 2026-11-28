@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PAID_TIERS, PLANS, type Interval, type PaidTier, type Tier } from "@/lib/plans";
-import { track } from "@/lib/analytics";
+import { metaTrack, track } from "@/lib/analytics";
 
 // mode "public": buttons send people to sign up.
 // mode "account": buttons start Stripe checkout (or switch plan).
@@ -36,6 +36,11 @@ export default function PricingCards({
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error || "Could not start checkout.");
       track("checkout_start", { tier, interval });
+      metaTrack("InitiateCheckout", {
+        value: interval === "year" ? PLANS[tier].yearlyPounds : PLANS[tier].pricePounds,
+        currency: "GBP",
+        content_name: PLANS[tier].name,
+      });
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start checkout.");

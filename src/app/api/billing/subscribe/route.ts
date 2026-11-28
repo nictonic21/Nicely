@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRequestUser, getUserRow } from "@/lib/auth";
 import { isPaidTier } from "@/lib/plans";
-import { getStripe, isLive, priceIdFor, yearlyAvailable, portalOptions } from "@/lib/stripe";
+import { getStripe, isLive, priceIdFor, yearlyAvailable, portalOptions, customerExists, STALE_CUSTOMER_RESET } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // POST /api/billing/subscribe  Body: { tier: "starter" | "plus" | "unlimited", interval?: "month" | "year" }
@@ -32,6 +32,17 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
     const row = await getUserRow(user.id, user.email ?? null);
     let customerId = row.stripe_customer_id;
+
+    // A customer saved from another Stripe account or mode (e.g. test data
+    // from before going live) doesn't exist here: forget it and start fresh.
+    if (customerId && !(await customerExists(stripe, customerId))) {
+      await admin
+        .from("users")
+        .update(STALE_CUSTOMER_RESET)
+        .eq("id", user.id)
+        .eq("stripe_customer_id", customerId);
+      customerId = null;
+    }
 
     if (!customerId) {
       // Reuse a customer already tagged with this person (e.g. two tabs).

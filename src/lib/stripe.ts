@@ -97,3 +97,29 @@ export function portalOptions(): { configuration?: string } {
   const id = process.env.STRIPE_PORTAL_CONFIGURATION;
   return id ? { configuration: id } : {};
 }
+
+// Whether a saved customer exists in the Stripe account the site uses now.
+// A customer saved from another account or mode (test data from before going
+// live, say) doesn't, and must be forgotten rather than breaking checkout.
+export async function customerExists(stripe: Stripe, customerId: string): Promise<boolean> {
+  try {
+    const c = await stripe.customers.retrieve(customerId);
+    return !("deleted" in c && c.deleted);
+  } catch (err) {
+    const code = (err as { code?: string; statusCode?: number }).code;
+    const status = (err as { statusCode?: number }).statusCode;
+    if (code === "resource_missing" || status === 404) return false;
+    throw err;
+  }
+}
+
+// Clears a person's Stripe link and plan when their saved customer belongs to
+// another Stripe account (e.g. the test sandbox). Only clears if the row still
+// points at that same customer.
+export const STALE_CUSTOMER_RESET = {
+  stripe_customer_id: null,
+  stripe_subscription_id: null,
+  plan: null,
+  payment_status: "none",
+  period_start: null,
+} as const;

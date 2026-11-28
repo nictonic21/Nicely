@@ -47,3 +47,19 @@ describe("signed links", () => {
     expect(verify("unsub:user-1", sig.slice(0, -2) + "xx")).toBe(false);
   });
 });
+
+describe("customerExists", () => {
+  const fake = (impl: () => Promise<unknown>) => ({ customers: { retrieve: impl } }) as never;
+  it("is true for a live customer and false for deleted or missing ones", async () => {
+    const { customerExists } = await import("@/lib/stripe");
+    expect(await customerExists(fake(async () => ({ id: "cus_1" })), "cus_1")).toBe(true);
+    expect(await customerExists(fake(async () => ({ id: "cus_1", deleted: true })), "cus_1")).toBe(false);
+    expect(
+      await customerExists(fake(async () => Promise.reject(Object.assign(new Error("No such customer"), { code: "resource_missing", statusCode: 404 }))), "cus_x")
+    ).toBe(false);
+  });
+  it("doesn't hide real errors like an outage", async () => {
+    const { customerExists } = await import("@/lib/stripe");
+    await expect(customerExists(fake(async () => Promise.reject(Object.assign(new Error("down"), { statusCode: 500 }))), "cus_1")).rejects.toThrow("down");
+  });
+});

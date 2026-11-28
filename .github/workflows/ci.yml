@@ -48,9 +48,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          # A dummy pixel ID so the cookie-consent tests run.
-          NEXT_PUBLIC_META_PIXEL_ID: "1234567890"
 
       - name: Install browser
         run: npx playwright install --with-deps chromium

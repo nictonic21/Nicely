@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getStripe, priceIdFor, tierForPrice } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { META_PIXEL_ID } from "@/components/MetaPixel";
 import { PLANS, type Interval, type PaidTier } from "@/lib/plans";
 
 // The owner's "setup check": tests every connection Nicelyy needs and
@@ -218,7 +219,9 @@ export async function runHealthChecks(): Promise<CheckGroup[]> {
         setting("Human check (Turnstile)", "TURNSTILE_SECRET_KEY", "Off: the free try relies on its other limits only.", false),
         setting("Error alerts (Sentry)", "NEXT_PUBLIC_SENTRY_DSN", "Off: you won't be told when something breaks.", false),
         setting("Google / Apple sign-in", "NEXT_PUBLIC_AUTH_PROVIDERS", "Off: email sign-up only.", false),
-        setting("Meta Pixel (ads)", "NEXT_PUBLIC_META_PIXEL_ID", "Off: no cookie banner, and Facebook/Instagram ads can't be measured.", false),
+        META_PIXEL_ID
+          ? { name: "Meta Pixel (ads)", status: "ok", detail: `Pixel ${META_PIXEL_ID}. Loads only for visitors who accept advertising cookies.` }
+          : { name: "Meta Pixel (ads)", status: "off", detail: "Off: no cookie banner, and Facebook/Instagram ads can't be measured." },
       ],
     },
   ];

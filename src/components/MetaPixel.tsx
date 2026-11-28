@@ -9,7 +9,10 @@ import { CONSENT_EVENT, getConsent } from "@/lib/consent";
 // off (autoConfig false), so Meta never reads buttons or text on the page:
 // it only gets the events Nicelyy sends on purpose.
 
-export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() || "";
+// Nicelyy's Meta Pixel (Events Manager). Pixel IDs aren't secret: every
+// site using one shows it to visitors. To change pixel, change this number.
+// Set to "" to switch the pixel and the cookie banner off.
+export const META_PIXEL_ID = "761860435544865";
 
 type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...a: unknown[]) => void; queue?: unknown[]; loaded?: boolean; version?: string; push?: unknown };
 

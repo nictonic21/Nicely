@@ -151,8 +151,8 @@ This needs a paid Apple Developer account (£79/year). Follow Supabase's guide u
 4. Nicelyy is set up so error reports never include what people write.
 
 ### Meta Pixel (Facebook / Instagram ads)
-1. In Meta Events Manager, copy your **Nicelyy** pixel's ID (a long number). Make sure it's Nicelyy's own pixel, not another business's.
-2. In Vercel, add `NEXT_PUBLIC_META_PIXEL_ID` with that number, then redeploy.
+1. The pixel ID (761860435544865) is set in `src/components/MetaPixel.tsx`. To use a different pixel, change that number (or ask Claude to).
+2. Make sure it's Nicelyy's own pixel in Meta Events Manager, not another business's.
 3. A cookie banner appears for visitors. The pixel only loads if they tap **Accept** (required in the UK). Automatic data collection is off, so Meta never sees what people write.
 4. Events sent: PageView, Lead (free try used), CompleteRegistration (sign-up), InitiateCheckout (with price), Subscribe (with price, after payment).
 5. Check it in Meta Events Manager → **Test events**: open your site, tap Accept, and watch the events arrive.

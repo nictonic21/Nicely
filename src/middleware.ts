@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { safeNext } from "@/lib/next-path";
 
 // Keeps the login session fresh, and sends signed-out visitors to sign up
 // before they can use the app.
@@ -38,10 +39,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(to);
   }
   if (user && (path === "/login" || path === "/signup")) {
-    const to = request.nextUrl.clone();
-    to.pathname = "/app";
-    to.search = "";
-    return NextResponse.redirect(to);
+    // Already logged in: go where they were heading (e.g. checkout for the
+    // plan they just picked on the home page), otherwise the app.
+    return NextResponse.redirect(new URL(safeNext(request.nextUrl.searchParams.get("next")), request.url));
   }
   return response;
 }

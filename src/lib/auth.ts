@@ -52,7 +52,4 @@ export async function countRewritesSince(userId: string, since: Date): Promise<n
   return count ?? 0;
 }
 
-// Only same-site paths, so ?next=//evil.com cannot bounce people away.
-export function safeNext(raw: string | null, fallback = "/app"): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : fallback;
-}
+export { safeNext } from "@/lib/next-path";
